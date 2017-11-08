@@ -2,6 +2,7 @@ package edu.orangecoastcollege.cs273.api;
 
 import edu.orangecoastcollege.cs273.model.Hero;
 import edu.orangecoastcollege.cs273.model.MatchID;
+import edu.orangecoastcollege.cs273.model.MatchPlayers;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -176,7 +177,23 @@ public class APIRequest {
 
             for (Object o : jsonArray) {
                 JSONObject jsonLineItem = (JSONObject) o;
-                MatchID match = new MatchID(String.valueOf(jsonLineItem.getLong("match_id")), String.valueOf(jsonLineItem.getInt("lobby_type")));
+
+                List<MatchPlayers> matchPlayersList = new ArrayList<>();
+                JSONArray matchPlayersArray = jsonLineItem.getJSONArray("players");
+                String matchId = String.valueOf(jsonLineItem.getLong("match_id"));
+
+                for (Object k : matchPlayersArray) {
+                    JSONObject matchPlayerJSON = (JSONObject) k;
+                    MatchPlayers player = new MatchPlayers(matchId, matchPlayerJSON.getInt("account_id"), matchPlayerJSON.getInt("player_slot"), matchPlayerJSON.getInt("hero_id"));
+                    matchPlayersList.add(player);
+                }
+
+                MatchID match = new MatchID(matchId,
+                        String.valueOf(jsonLineItem.getLong("match_seq_num")),
+                        String.valueOf(jsonLineItem.getLong("start_time")),
+                        jsonLineItem.getInt("lobby_type"),
+                        matchPlayersList);
+
                 matchIDArrayList.add(match);
             }
 

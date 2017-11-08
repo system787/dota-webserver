@@ -43,20 +43,7 @@ public class HelloWorldController {
 
     @RequestMapping("/getlast25")
     public String getLast25() {
-        Logger.getLogger(TAG).log(Level.INFO, "Attempting to retrieve last 25 matches");
-        List<MatchID> last25List = mAPIRequest.getMatches(vanityto64(), 25);
-
-        Logger.getLogger(TAG).log(Level.INFO, "Size of last25List: " + last25List.size());
-        if (last25List.size() >= 1) {
-            Logger.getLogger(TAG).log(Level.INFO, "last25List.get(0) = " + last25List.get(0).toString());
-        }
-
-        StringBuilder sb = new StringBuilder();
-
-        for (MatchID matchID : last25List) {
-            sb.append(matchID.getmMatchID()).append(" ").append(matchID.getmLobbyType()).append("\n");
-        }
-        return sb.toString();
+        return "Hello World!";
     }
 
     @RequestMapping("/getallheroes")
