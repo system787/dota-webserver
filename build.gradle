@@ -27,6 +27,8 @@ repositories {
 }
 
 dependencies {
+    compile("org.json:json:20160810")
+    compile("org.xerial:sqlite-jdbc:3.19.3")
     // tag::jetty[]
     compile("org.springframework.boot:spring-boot-starter-web") {
         exclude module: "spring-boot-starter-tomcat"
