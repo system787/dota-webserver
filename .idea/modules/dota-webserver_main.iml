@@ -15,7 +15,7 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Gradle: org.json:json:20160810" level="project" />
-    <orderEntry type="library" name="Gradle: org.xerial:sqlite-jdbc:3.15.1" level="project" />
+    <orderEntry type="library" name="Gradle: org.xerial:sqlite-jdbc:3.19.3" level="project" />
     <orderEntry type="library" name="Gradle: org.springframework.boot:spring-boot-starter-web:1.5.8.RELEASE" level="project" />
     <orderEntry type="library" name="Gradle: org.springframework.boot:spring-boot-starter-jetty:1.5.8.RELEASE" level="project" />
     <orderEntry type="library" name="Gradle: org.springframework.boot:spring-boot-starter-actuator:1.5.8.RELEASE" level="project" />
