@@ -2,10 +2,9 @@ package edu.orangecoastcollege.cs273.model;
 
 import edu.orangecoastcollege.cs273.controller.SQLController;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -106,6 +105,58 @@ public class User {
         } catch (SQLException e) {
             Logger.getLogger(TAG).log(Level.SEVERE, "Error inserting into table \"users\"");
         }
+    }
+
+    public void updateUser(SQLController dbc, User user) {
+        String updateStatement = "UPDATE users SET  "
+                + "privacy = ? , " // 1
+                + "profile_state = ? , " // 2
+                + "persona_name = ? , " // 3
+                + "last_log_off = ? , " // 4
+                + "profile_url = ? , " // 5
+                + "avatar_url = ? " // 6
+                + "WHERE steam_id = ?"; // 7
+        try {
+            Connection connection = dbc.database();
+            PreparedStatement preparedStatement = connection.prepareStatement(updateStatement);
+            preparedStatement.setInt(1, mPrivacy);
+            preparedStatement.setInt(2, mProfileState);
+            preparedStatement.setString(3, mPersonaName);
+            preparedStatement.setString(4, mLastLogOff);
+            preparedStatement.setString(5, mProfileUrl);
+            preparedStatement.setString(6, mAvatarUrl);
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            Logger.getLogger(TAG).log(Level.SEVERE, "Error updating user " + mSteamId64);
+        }
+    }
+
+    public static List<User> getAllUsers(SQLController dbc) {
+        String selectStatement = "SELECT * FROM users";
+
+        try {
+            Connection connection = dbc.database();
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(selectStatement);
+            List<User> userList = new ArrayList<>();
+
+            while (resultSet.next()) {
+                userList.add(new User(
+                        resultSet.getString("steam_id"),
+                        resultSet.getInt("privacy"),
+                        resultSet.getInt("profile_state"),
+                        resultSet.getString("persona_name"),
+                        resultSet.getString("last_log_off"),
+                        resultSet.getString("profile_url"),
+                        resultSet.getString("avatar_url")
+                ));
+            }
+
+            return userList;
+        } catch (SQLException e) {
+            Logger.getLogger(TAG).log(Level.SEVERE, "Error retrieving table \"users\"");
+        }
+        return null;
     }
 
     public static class Model extends SQLController.LocalDataBaseModel {

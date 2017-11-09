@@ -54,7 +54,7 @@ public class APIRequestTest {
         for (int i = 0; i < readFromDB.size(); i++) {
             assertTrue(readFromDB.get(i).equals(serverQueryList.get(i)));
         }
-
     }
+
 
 }

@@ -108,6 +108,7 @@ public class MatchID {
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(selectStatement);
             List<MatchID> matchIDList = new ArrayList<>();
+
             while (resultSet.next()) {
                 String matchId = resultSet.getString("match_id");
                 List<MatchPlayers> matchPlayersList = MatchPlayers.getPlayersInMatch(dbc, matchId);
@@ -115,7 +116,8 @@ public class MatchID {
                         resultSet.getString("match_seq_num"),
                         resultSet.getString("start_time"),
                         resultSet.getInt("lobby_type"),
-                        matchPlayersList));
+                        matchPlayersList
+                ));
             }
 
             return matchIDList;

@@ -3,6 +3,7 @@ package edu.orangecoastcollege.cs273.controller;
 import edu.orangecoastcollege.cs273.model.Hero;
 import edu.orangecoastcollege.cs273.model.MatchID;
 import edu.orangecoastcollege.cs273.model.MatchPlayers;
+import edu.orangecoastcollege.cs273.model.UserMatchID;
 
 import java.sql.*;
 import java.util.logging.Level;
@@ -39,7 +40,8 @@ public final class SQLController {
     private final LocalDataBaseModel[] models = new LocalDataBaseModel[]{
             // add local database models here
             // format { new Object.Model(), new Object2.Model() };
-            new Hero.Model(), new MatchPlayers.Model(), new MatchID.Model()
+            new Hero.Model(), new MatchPlayers.Model(),
+            new MatchID.Model(), new UserMatchID.Model()
     };
 
     public synchronized static SQLController getInstance() {
