@@ -3,6 +3,7 @@ package edu.orangecoastcollege.cs273.model;
 import edu.orangecoastcollege.cs273.controller.SQLController;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.logging.Level;
@@ -81,6 +82,30 @@ public class User {
 
     public void setAvatarUrl(String avatarUrl) {
         mAvatarUrl = avatarUrl;
+    }
+
+    /* Database Methods */
+    private static final String TAG = "User";
+
+    public void saveToDB(SQLController dbc) {
+        String insertStatement = "INSERT INTO users"
+                + "(steam_id, privacy, profile_state, persona_name, last_log_off, profile_url, avatar_url) "
+                + "VALUES(?,?,?,?,?,?,?)";
+
+        try {
+            Connection connection = dbc.database();
+            PreparedStatement preparedStatement = connection.prepareStatement(insertStatement);
+            preparedStatement.setString(1, mSteamId64);
+            preparedStatement.setInt(2, mPrivacy);
+            preparedStatement.setInt(3, mProfileState);
+            preparedStatement.setString(4, mPersonaName);
+            preparedStatement.setString(5, mLastLogOff);
+            preparedStatement.setString(6, mProfileUrl);
+            preparedStatement.setString(7, mAvatarUrl);
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            Logger.getLogger(TAG).log(Level.SEVERE, "Error inserting into table \"users\"");
+        }
     }
 
     public static class Model extends SQLController.LocalDataBaseModel {
