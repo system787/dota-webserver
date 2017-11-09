@@ -4,6 +4,7 @@ import edu.orangecoastcollege.cs273.controller.SQLController;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -100,19 +101,19 @@ public class MatchID {
         }
     }
 
-    public static List<MatchID> getAllMatches(SQLController dbc) {
+    public static HashMap<String, MatchID> getAllMatches(SQLController dbc) {
         String selectStatement = "SELECT * FROM match_id";
 
         try {
             Connection connection = dbc.database();
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(selectStatement);
-            List<MatchID> matchIDList = new ArrayList<>();
+            HashMap<String, MatchID> matchIDHashMap = new HashMap<>();
 
             while (resultSet.next()) {
                 String matchId = resultSet.getString("match_id");
                 List<MatchPlayers> matchPlayersList = MatchPlayers.getPlayersInMatch(dbc, matchId);
-                matchIDList.add(new MatchID(matchId,
+                matchIDHashMap.put(matchId, new MatchID(matchId,
                         resultSet.getString("match_seq_num"),
                         resultSet.getString("start_time"),
                         resultSet.getInt("lobby_type"),
@@ -120,7 +121,7 @@ public class MatchID {
                 ));
             }
 
-            return matchIDList;
+            return matchIDHashMap;
         } catch (SQLException e) {
             Logger.getLogger(TAG).log(Level.SEVERE, "Error retrieving table \"match_id\"");
         }

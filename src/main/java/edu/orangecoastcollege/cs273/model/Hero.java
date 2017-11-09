@@ -4,6 +4,7 @@ import edu.orangecoastcollege.cs273.controller.SQLController;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -89,18 +90,19 @@ public class Hero {
         }
     }
 
-    public static List<Hero> getAllHeroes(SQLController dbc) {
+    public static HashMap<Integer, Hero> getAllHeroes(SQLController dbc) {
         String selectStatement = "SELECT * FROM heroes";
 
         try {
             Connection connection = dbc.database();
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(selectStatement);
-            List<Hero> heroList = new ArrayList<>();
+            HashMap<Integer, Hero> heroHashMap = new HashMap<>();
             while (resultSet.next()) {
-                heroList.add(new Hero(resultSet.getInt("id"), resultSet.getString("token_name"), resultSet.getString("localized_name")));
+                int id = resultSet.getInt("id");
+                heroHashMap.put(id, new Hero(id, resultSet.getString("token_name"), resultSet.getString("localized_name")));
             }
-            return heroList;
+            return heroHashMap;
         } catch (SQLException e) {
             Logger.getLogger(TAG).log(Level.SEVERE, "Error retrieving table \"heroes\"");
         }

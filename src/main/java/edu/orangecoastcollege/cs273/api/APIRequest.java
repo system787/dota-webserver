@@ -14,6 +14,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -135,7 +136,7 @@ public class APIRequest {
         return String.valueOf(Long.parseLong(steamId64) - 76561197960265728L);
     }
 
-    public List<Hero> getAllHeroes() {
+    public HashMap<Integer, Hero> getAllHeroes() {
         String url = "https://api.steampowered.com/IEconDOTA2_570/GetHeroes/v0001/?language=en_US&key=" + API_KEY;
 
         try {
@@ -146,14 +147,16 @@ public class APIRequest {
             }
 
             JSONArray jsonArray = response.getJSONArray("heroes");
-            ArrayList<Hero> heroArrayList = new ArrayList<>();
+            HashMap<Integer, Hero> heroHashMap = new HashMap<>();
+            //ArrayList<Hero> heroArrayList = new ArrayList<>();
 
             for (Object o : jsonArray) {
                 JSONObject jsonLineItem = (JSONObject) o;
-                Hero hero = new Hero(jsonLineItem.getInt("id"), jsonLineItem.getString("name"), jsonLineItem.getString("localized_name"));
-                heroArrayList.add(hero);
+                int id = jsonLineItem.getInt("id");
+                Hero hero = new Hero(id, jsonLineItem.getString("name"), jsonLineItem.getString("localized_name"));
+                heroHashMap.put(id, hero);
             }
-            return heroArrayList;
+            return heroHashMap;
         } catch (JSONException e) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, "JSON exception in retrieving heroes list from master server", e);
         }

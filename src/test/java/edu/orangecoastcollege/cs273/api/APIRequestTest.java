@@ -9,20 +9,17 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
-public class DatabaseTesting {
-    static final String TAG = "DatabaseTesting";
+public class APIRequestTest {
+    static final String TAG = "APIRequestTest";
     static SQLController mSQLController;
     static APIRequest mAPIRequest;
-    static List<Hero> serverQueryList;
+    static HashMap<Integer, Hero> serverQueryHashMap;
 
     @BeforeClass
     public static void databaseConnections() throws SQLException {
@@ -32,7 +29,7 @@ public class DatabaseTesting {
         TimerTask heroQueryTask = new TimerTask() {
             @Override
             public void run() {
-                serverQueryList = mAPIRequest.getAllHeroes();
+                serverQueryHashMap = mAPIRequest.getAllHeroes();
             }
         };
 
@@ -56,18 +53,15 @@ public class DatabaseTesting {
     @Test
     public void getAllHeroes() throws Exception {
 
-        for (Hero h : serverQueryList) {
+        for (Hero h : serverQueryHashMap.values()) {
             h.saveToDB(mSQLController);
         }
 
-        List<Hero> readFromDB = new ArrayList<>();
+        HashMap<Integer, Hero> readFromDB = new HashMap<>();
         readFromDB = Hero.getAllHeroes(mSQLController);
 
-        serverQueryList.sort((o1, o2) -> o1.getId() - o2.getId());
-        readFromDB.sort((o1, o2) -> o1.getId() - o2.getId());
-
-        for (int i = 0; i < readFromDB.size(); i++) {
-            assertTrue(readFromDB.get(i).equals(serverQueryList.get(i)));
+        for (Integer i : serverQueryHashMap.keySet()) {
+            assertTrue(readFromDB.get(i).equals(serverQueryHashMap.get(i)));
         }
     }
 
@@ -86,39 +80,38 @@ public class DatabaseTesting {
         User u6 = new User("6", 5, 1,
                 "personaname6", "12345", "url6", "ava6");
 
-        List<User> userList = new ArrayList<>();
-        userList.add(u1);
-        userList.add(u2);
-        userList.add(u3);
-        userList.add(u4);
-        userList.add(u5);
-        userList.add(u6);
+        HashMap<String, User> userHashMap = new HashMap<>();
+        userHashMap.put(u1.getSteamId64(), u1);
+        userHashMap.put(u2.getSteamId64(), u2);
+        userHashMap.put(u3.getSteamId64(), u3);
+        userHashMap.put(u4.getSteamId64(), u4);
+        userHashMap.put(u5.getSteamId64(), u5);
+        userHashMap.put(u6.getSteamId64(), u6);
 
-        for (User u : userList) {
+        for (User u : userHashMap.values()) {
             u.saveToDB(mSQLController);
         }
 
-        List<User> readFromDB = User.getAllUsers(mSQLController);
+        HashMap<String, User> readFromDB = User.getAllUsers(mSQLController);
+        List<User> readFromDBList = new ArrayList<User>(readFromDB.values());
+        List<User> seedDataList = new ArrayList<User>(userHashMap.values());
 
-        readFromDB.sort((o1,o2) -> Integer.parseInt(o1.getSteamId64()) - Integer.parseInt(o2.getSteamId64()));
-        userList.sort((o1,o2) -> Integer.parseInt(o1.getSteamId64()) - Integer.parseInt(o2.getSteamId64()));
+        readFromDBList.sort((o1, o2) -> Integer.valueOf(o1.getSteamId64()) - Integer.valueOf(o2.getSteamId64()));
+        seedDataList.sort((o1, o2) -> Integer.valueOf(o1.getSteamId64()) - Integer.valueOf(o2.getSteamId64()));
 
-        for (int i = 0; i < userList.size(); i++) {
-            assertTrue(userList.get(i).getPersonaName().equals(readFromDB.get(i).getPersonaName()));
+        for (int i = 0; i < readFromDBList.size(); i++) {
+            assertTrue(seedDataList.get(i).getPersonaName().equals(readFromDBList.get(i).getPersonaName()));
         }
     }
 
     @Test
     public void getAllUsers() {
-        List<User> allUsersList = User.getAllUsers(mSQLController);
-        for (User u : allUsersList) {
+        HashMap<String, User> allUsersHashMap = User.getAllUsers(mSQLController);
+        for (User u : allUsersHashMap.values()) {
             Logger.getLogger(TAG).log(Level.INFO, u.getPersonaName());
         }
 
-        assertTrue(allUsersList.size() == 6);
+        assertTrue(allUsersHashMap.size() == 6);
     }
-
-
-
 
 }
