@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 import sun.rmi.runtime.Log;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -49,11 +50,11 @@ public class HelloWorldController {
     @RequestMapping("/getallheroes")
     public String getAllHeroes() {
         Logger.getLogger(TAG).log(Level.INFO, "Attempting to retrieve all heroes from master server");
-        List<Hero> allHeroesList = mAPIRequest.getAllHeroes();
+        HashMap<Integer, Hero> heroesHashMap = mAPIRequest.getAllHeroes();
 
         StringBuilder sb = new StringBuilder();
 
-        for (Hero h : allHeroesList) {
+        for (Hero h : heroesHashMap.values()) {
             String output = h.getId() + " " + h.getTokenName() + " " + h.getLocalizedName() + "\n";
             sb.append(output);
         }

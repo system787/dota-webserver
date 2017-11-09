@@ -4,6 +4,7 @@ import edu.orangecoastcollege.cs273.controller.SQLController;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -157,18 +158,19 @@ public class User {
         }
     }
 
-    public static List<User> getAllUsers(SQLController dbc) {
+    public static HashMap<String, User> getAllUsers(SQLController dbc) {
         String selectStatement = "SELECT * FROM users";
 
         try {
             Connection connection = dbc.database();
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(selectStatement);
-            List<User> userList = new ArrayList<>();
+            HashMap<String, User> userHashMap = new HashMap<>();
 
             while (resultSet.next()) {
-                userList.add(new User(
-                        resultSet.getString("steam_id"),
+                String steamId = resultSet.getString("steam_id");
+                userHashMap.put(steamId, new User(
+                        steamId,
                         resultSet.getInt("privacy"),
                         resultSet.getInt("profile_state"),
                         resultSet.getString("persona_name"),
@@ -178,7 +180,7 @@ public class User {
                 ));
             }
 
-            return userList;
+            return userHashMap;
         } catch (SQLException e) {
             Logger.getLogger(TAG).log(Level.SEVERE, "Error retrieving table \"users\"");
         }
