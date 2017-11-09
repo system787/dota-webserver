@@ -83,13 +83,39 @@ public class User {
         mAvatarUrl = avatarUrl;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        User user = (User) o;
+
+        if (mPrivacy != user.mPrivacy) return false;
+        if (mProfileState != user.mProfileState) return false;
+        if (mSteamId64 != null ? !mSteamId64.equals(user.mSteamId64) : user.mSteamId64 != null) return false;
+        if (mPersonaName != null ? !mPersonaName.equals(user.mPersonaName) : user.mPersonaName != null) return false;
+        if (mLastLogOff != null ? !mLastLogOff.equals(user.mLastLogOff) : user.mLastLogOff != null) return false;
+        if (mProfileUrl != null ? !mProfileUrl.equals(user.mProfileUrl) : user.mProfileUrl != null) return false;
+        return mAvatarUrl != null ? mAvatarUrl.equals(user.mAvatarUrl) : user.mAvatarUrl == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = mSteamId64 != null ? mSteamId64.hashCode() : 0;
+        result = 31 * result + mPrivacy;
+        result = 31 * result + mProfileState;
+        result = 31 * result + (mPersonaName != null ? mPersonaName.hashCode() : 0);
+        result = 31 * result + (mLastLogOff != null ? mLastLogOff.hashCode() : 0);
+        result = 31 * result + (mProfileUrl != null ? mProfileUrl.hashCode() : 0);
+        result = 31 * result + (mAvatarUrl != null ? mAvatarUrl.hashCode() : 0);
+        return result;
+    }
+
     /* Database Methods */
     private static final String TAG = "User";
 
     public void saveToDB(SQLController dbc) {
-        String insertStatement = "INSERT INTO users"
-                + "(steam_id, privacy, profile_state, persona_name, last_log_off, profile_url, avatar_url) "
-                + "VALUES(?,?,?,?,?,?,?)";
+        String insertStatement = "INSERT INTO users(steam_id, privacy, profile_state, persona_name, last_log_off, profile_url, avatar_url) VALUES(?,?,?,?,?,?,?)";
 
         try {
             Connection connection = dbc.database();

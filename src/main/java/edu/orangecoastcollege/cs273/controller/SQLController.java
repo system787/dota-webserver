@@ -1,9 +1,6 @@
 package edu.orangecoastcollege.cs273.controller;
 
-import edu.orangecoastcollege.cs273.model.Hero;
-import edu.orangecoastcollege.cs273.model.MatchID;
-import edu.orangecoastcollege.cs273.model.MatchPlayers;
-import edu.orangecoastcollege.cs273.model.UserMatchID;
+import edu.orangecoastcollege.cs273.model.*;
 
 import java.sql.*;
 import java.util.logging.Level;
@@ -21,12 +18,7 @@ public final class SQLController {
         }
 
         public void deleteTable(Connection connection) {
-            try {
-                Statement stmt = connection.createStatement();
-                stmt.executeUpdate("DELETE FROM steamid");
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+
         }
     }
 
@@ -41,7 +33,8 @@ public final class SQLController {
             // add local database models here
             // format { new Object.Model(), new Object2.Model() };
             new Hero.Model(), new MatchPlayers.Model(),
-            new MatchID.Model(), new UserMatchID.Model()
+            new MatchID.Model(), new UserMatchID.Model(),
+            new User.Model()
     };
 
     public synchronized static SQLController getInstance() {
@@ -69,6 +62,22 @@ public final class SQLController {
     public synchronized void createDB(Connection connection) {
         for (LocalDataBaseModel model : models) {
             model.createTable(connection);
+        }
+    }
+
+    public synchronized void resetAllTables() {
+        try {
+            if (mConnection.isClosed()) {
+                instance.openConnection();
+            }
+            Connection connection = instance.database();
+            for (LocalDataBaseModel model : models) {
+                model.deleteTable(connection);
+            }
+            createDB(connection);
+            instance.close();
+        } catch (SQLException e) {
+            Logger.getLogger(TAG).log(Level.SEVERE, "Error deleting all tables from local database models");
         }
     }
 

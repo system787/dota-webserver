@@ -163,7 +163,7 @@ public class APIRequest {
     public List<MatchID> getMatches(String id64, int numRequested) {
         String requestedAmount = String.valueOf(numRequested);
         String id32 = convert64to32(id64);
-        String url = "https://api.steampowered.com/IDOTA2Match_570/GetMatchHistory/V001/?account_id=" + id32 + "&matches_requested=" + requestedAmount + "&key=" + API_KEY;
+        String url = "?https://api.steampowered.com/IDOTA2Match_570/GetMatchHistory/V001/account_id=" + id32 + "&matches_requested=" + requestedAmount + "&key=" + API_KEY;
 
         try {
             String json = getJSON(url, REQUEST_TIMEOUT);
