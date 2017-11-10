@@ -17,9 +17,9 @@ public class MatchID {
     private String mMatchSeqNum;
     private String mStartTime;
     private int mLobbyType;
-    private List<MatchPlayers> mMatchPlayers;
+    private List<MatchPlayer> mMatchPlayers;
 
-    public MatchID(String matchID, String matchSeqNum, String startTime, int lobbyType, List<MatchPlayers> matchPlayers) {
+    public MatchID(String matchID, String matchSeqNum, String startTime, int lobbyType, List<MatchPlayer> matchPlayers) {
         mMatchID = matchID;
         mMatchSeqNum = matchSeqNum;
         mStartTime = startTime;
@@ -64,11 +64,11 @@ public class MatchID {
         mLobbyType = lobbyType;
     }
 
-    public List<MatchPlayers> getMatchPlayers() {
+    public List<MatchPlayer> getMatchPlayers() {
         return mMatchPlayers;
     }
 
-    public void setMatchPlayers(List<MatchPlayers> matchPlayers) {
+    public void setMatchPlayers(List<MatchPlayer> matchPlayers) {
         mMatchPlayers = matchPlayers;
     }
 
@@ -112,7 +112,7 @@ public class MatchID {
 
             while (resultSet.next()) {
                 String matchId = resultSet.getString("match_id");
-                List<MatchPlayers> matchPlayersList = MatchPlayers.getPlayersInMatch(dbc, matchId);
+                List<MatchPlayer> matchPlayersList = MatchPlayer.getPlayersInMatch(dbc, matchId);
                 matchIDHashMap.put(matchId, new MatchID(matchId,
                         resultSet.getString("match_seq_num"),
                         resultSet.getString("start_time"),

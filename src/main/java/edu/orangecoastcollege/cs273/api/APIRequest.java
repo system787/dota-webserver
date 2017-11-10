@@ -2,7 +2,7 @@ package edu.orangecoastcollege.cs273.api;
 
 import edu.orangecoastcollege.cs273.model.Hero;
 import edu.orangecoastcollege.cs273.model.MatchID;
-import edu.orangecoastcollege.cs273.model.MatchPlayers;
+import edu.orangecoastcollege.cs273.model.MatchPlayer;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -38,6 +38,7 @@ public class APIRequest {
     public String getJSON(String url, int timeout) throws JSONException {
         HttpURLConnection c = null;
         try {
+            Logger.getLogger(TAG).log(Level.INFO, "Building new HTTP connection");
             URL u = new URL(url);
             c = (HttpURLConnection) u.openConnection();
             c.setRequestMethod("GET");
@@ -46,8 +47,10 @@ public class APIRequest {
             c.setAllowUserInteraction(false);
             c.setConnectTimeout(timeout);
             c.setReadTimeout(timeout);
+            Logger.getLogger(TAG).log(Level.INFO, "Attempting to connect to URL");
             c.connect();
             int status = c.getResponseCode();
+            Logger.getLogger(TAG).log(Level.INFO, "Response code received: " + status);
 
             switch (status) {
                 case 200:
@@ -181,13 +184,13 @@ public class APIRequest {
             for (Object o : jsonArray) {
                 JSONObject jsonLineItem = (JSONObject) o;
 
-                List<MatchPlayers> matchPlayersList = new ArrayList<>();
+                List<MatchPlayer> matchPlayersList = new ArrayList<>();
                 JSONArray matchPlayersArray = jsonLineItem.getJSONArray("players");
                 String matchId = String.valueOf(jsonLineItem.getLong("match_id"));
 
                 for (Object k : matchPlayersArray) {
                     JSONObject matchPlayerJSON = (JSONObject) k;
-                    MatchPlayers player = new MatchPlayers(matchId, matchPlayerJSON.getInt("account_id"), matchPlayerJSON.getInt("player_slot"), matchPlayerJSON.getInt("hero_id"));
+                    MatchPlayer player = new MatchPlayer(matchId, matchPlayerJSON.getInt("account_id"), matchPlayerJSON.getInt("player_slot"), matchPlayerJSON.getInt("hero_id"));
                     matchPlayersList.add(player);
                 }
 

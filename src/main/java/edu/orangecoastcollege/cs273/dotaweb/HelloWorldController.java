@@ -51,7 +51,7 @@ public class HelloWorldController {
     public String getAllHeroes() {
         Logger.getLogger(TAG).log(Level.INFO, "Attempting to retrieve all heroes from master server");
         HashMap<Integer, Hero> heroesHashMap = mAPIRequest.getAllHeroes();
-
+        Logger.getLogger(TAG).log(Level.INFO, "Data received from server");
         StringBuilder sb = new StringBuilder();
 
         for (Hero h : heroesHashMap.values()) {
@@ -59,6 +59,7 @@ public class HelloWorldController {
             sb.append(output);
         }
 
+        Logger.getLogger(TAG).log(Level.INFO, "Processing complete");
         return sb.toString();
     }
 

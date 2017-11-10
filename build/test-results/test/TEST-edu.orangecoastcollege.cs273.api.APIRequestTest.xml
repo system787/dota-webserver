@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="edu.orangecoastcollege.cs273.api.APIRequestTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2017-11-10T02:14:38" hostname="vincents-mbp.gsm1900.org" time="0.141">
+  <properties/>
+  <testcase name="checkUserDatabase" classname="edu.orangecoastcollege.cs273.api.APIRequestTest" time="0.012"/>
+  <testcase name="getAllHeroes" classname="edu.orangecoastcollege.cs273.api.APIRequestTest" time="0.124"/>
+  <testcase name="getAllUsers" classname="edu.orangecoastcollege.cs273.api.APIRequestTest" time="0.004"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[Nov 09, 2017 6:14:38 PM edu.orangecoastcollege.cs273.api.APIRequest getJSON
+INFO: Building new HTTP connection
+Nov 09, 2017 6:14:38 PM edu.orangecoastcollege.cs273.api.APIRequest getJSON
+INFO: Attempting to connect to URL
+Nov 09, 2017 6:14:38 PM edu.orangecoastcollege.cs273.api.APIRequest getJSON
+INFO: Response code received: 200
+Nov 09, 2017 6:14:39 PM edu.orangecoastcollege.cs273.api.APIRequestTest getAllUsers
+INFO: personaname1
+Nov 09, 2017 6:14:39 PM edu.orangecoastcollege.cs273.api.APIRequestTest getAllUsers
+INFO: personaname2
+Nov 09, 2017 6:14:39 PM edu.orangecoastcollege.cs273.api.APIRequestTest getAllUsers
+INFO: personaname3
+Nov 09, 2017 6:14:39 PM edu.orangecoastcollege.cs273.api.APIRequestTest getAllUsers
+INFO: personaname4
+Nov 09, 2017 6:14:39 PM edu.orangecoastcollege.cs273.api.APIRequestTest getAllUsers
+INFO: personaname5
+Nov 09, 2017 6:14:39 PM edu.orangecoastcollege.cs273.api.APIRequestTest getAllUsers
+INFO: personaname6
+]]></system-err>
+</testsuite>

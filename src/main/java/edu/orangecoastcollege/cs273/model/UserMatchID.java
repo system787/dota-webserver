@@ -2,10 +2,8 @@ package edu.orangecoastcollege.cs273.model;
 
 import edu.orangecoastcollege.cs273.controller.SQLController;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,6 +21,23 @@ public class UserMatchID {
         } catch (SQLException e) {
             Logger.getLogger(TAG).log(Level.SEVERE, "Error inserting into table \"user_match\"");
         }
+    }
+
+    public static HashMap<String, String> getAllUserMatch(SQLController dbc) {
+        String selectStatement = "SELECT * FROM user_match";
+        try {
+            Connection connection = dbc.database();
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(selectStatement);
+            HashMap<String, String> userMatchIDHashMap = new HashMap<>();
+            while (resultSet.next()) {
+                userMatchIDHashMap.put(resultSet.getString("steam_id"), resultSet.getString("match_id"));
+            }
+            return userMatchIDHashMap;
+        } catch (SQLException e) {
+            Logger.getLogger(TAG).log(Level.SEVERE, "Error retrieving table \"user_match\"");
+        }
+        return null;
     }
 
     public static class Model extends SQLController.LocalDataBaseModel {
