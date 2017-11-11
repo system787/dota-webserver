@@ -11,11 +11,11 @@ public class UserMatchID {
     private static final String TAG = "UserMatchID";
 
     public static void saveUserMatch(SQLController dbc, User user, MatchID match) {
-        String insertStatement = "INSERT INTO user_match(steam_id64, match_id) VALUES(?,?)";
+        String insertStatement = "INSERT INTO user_match(steam_id, match_id) VALUES(?,?)";
         try {
             Connection connection = dbc.database();
             PreparedStatement preparedStatement = connection.prepareStatement(insertStatement);
-            preparedStatement.setLong(1, user.getSteamId64());
+            preparedStatement.setLong(1, user.getSteamId32());
             preparedStatement.setLong(2, match.getMatchID());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
@@ -23,15 +23,15 @@ public class UserMatchID {
         }
     }
 
-    public static HashMap<String, String> getAllUserMatch(SQLController dbc) {
+    public static HashMap<Long, Long> getAllUserMatch(SQLController dbc) {
         String selectStatement = "SELECT * FROM user_match";
         try {
             Connection connection = dbc.database();
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(selectStatement);
-            HashMap<String, String> userMatchIDHashMap = new HashMap<>();
+            HashMap<Long, Long> userMatchIDHashMap = new HashMap<>();
             while (resultSet.next()) {
-                userMatchIDHashMap.put(resultSet.getString("steam_id"), resultSet.getString("match_id"));
+                userMatchIDHashMap.put(resultSet.getLong("steam_id"), resultSet.getLong("match_id"));
             }
             return userMatchIDHashMap;
         } catch (SQLException e) {
@@ -48,7 +48,7 @@ public class UserMatchID {
         @Override
         public void createTable(Connection connection) {
             String createStatement = "CREATE TABLE IF NOT EXISTS user_match(id INTEGER PRIMARY KEY NOT NULL, " +
-                    "steam_id64 INTEGER NOT NULL, " +
+                    "steam_id INTEGER NOT NULL, " +
                     "match_id INTEGER NOT NULL);";
             try {
                 Statement statement = connection.createStatement();

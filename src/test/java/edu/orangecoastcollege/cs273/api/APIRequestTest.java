@@ -109,8 +109,8 @@ public class APIRequestTest {
 
         List<User> readFromDBList = User.getAllUsers(mSQLController);
 
-        readFromDBList.sort((o1, o2) -> o1.getSteamId32() - o2.getSteamId32());
-        seedDataList.sort((o1, o2) -> o1.getSteamId32() - o2.getSteamId32());
+        readFromDBList.sort((o1, o2) -> Long.compare(o1.getSteamId32(), o2.getSteamId32()));
+        seedDataList.sort((o1, o2) -> Long.compare(o1.getSteamId32(), o2.getSteamId32()));
 
         for (int i = 0; i < readFromDBList.size(); i++) {
             assertTrue(seedDataList.get(i).getPersonaName().equals(readFromDBList.get(i).getPersonaName()));
@@ -120,10 +120,6 @@ public class APIRequestTest {
     @Test
     public void getAllUsers() {
         List<User> userList = User.getAllUsers(mSQLController);
-        for (User u : userList) {
-            Logger.getLogger(TAG).log(Level.INFO, u.getPersonaName());
-        }
-        System.out.println(userList.size());
         assertTrue(userList.size() == 6);
     }
 
@@ -177,11 +173,32 @@ public class APIRequestTest {
         return matchIDList;
     }
 
-    @Test
     public void writeUserMatchToDB() {
         List<MatchID> matchIDList = getMatchIDFromJSON();
-        List<User> userList = getUserList();
+        List<User> userList = User.getAllUsers(mSQLController);
 
+        for (int i = 0; i < userList.size(); i++) {
+            User user = userList.get(i);
+            List<MatchID> playerMatches = new ArrayList<>();
+
+            for (int j = 0; j < matchIDList.size(); j++) {
+                List<MatchPlayer> matchPlayerList = matchIDList.get(j).getMatchPlayers();
+
+                for (int k = 0; k < matchPlayerList.size(); k++) {
+
+                    if (matchPlayerList.get(k).getId32() == user.getSteamId32()) {
+                        UserMatchID.saveUserMatch(mSQLController, user, matchIDList.get(j));
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    public void checkUserMatchID() {
+        writeUserMatchToDB();
+
+        HashMap<Long, Long> userMatchIDHashMap = UserMatchID.getAllUserMatch(mSQLController);
     }
 
 }
