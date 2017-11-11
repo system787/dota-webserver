@@ -13,13 +13,13 @@ import java.util.logging.Logger;
  * Created by vincenthoang on 8/2/17.
  */
 public class MatchID {
-    private String mMatchID;
-    private String mMatchSeqNum;
-    private String mStartTime;
+    private long mMatchID;
+    private long mMatchSeqNum;
+    private long mStartTime;
     private int mLobbyType;
     private List<MatchPlayer> mMatchPlayers;
 
-    public MatchID(String matchID, String matchSeqNum, String startTime, int lobbyType, List<MatchPlayer> matchPlayers) {
+    public MatchID(long matchID, long matchSeqNum, long startTime, int lobbyType, List<MatchPlayer> matchPlayers) {
         mMatchID = matchID;
         mMatchSeqNum = matchSeqNum;
         mStartTime = startTime;
@@ -27,32 +27,27 @@ public class MatchID {
         mMatchPlayers = matchPlayers;
     }
 
-    public String getmMatchID() {
+    public long getMatchID() {
         return mMatchID;
     }
 
-
-    public String getMatchID() {
-        return mMatchID;
-    }
-
-    public void setMatchID(String matchID) {
+    public void setMatchID(long matchID) {
         mMatchID = matchID;
     }
 
-    public String getMatchSeqNum() {
+    public long getMatchSeqNum() {
         return mMatchSeqNum;
     }
 
-    public void setMatchSeqNum(String matchSeqNum) {
+    public void setMatchSeqNum(long matchSeqNum) {
         mMatchSeqNum = matchSeqNum;
     }
 
-    public String getStartTime() {
+    public long getStartTime() {
         return mStartTime;
     }
 
-    public void setStartTime(String startTime) {
+    public void setStartTime(long startTime) {
         mStartTime = startTime;
     }
 
@@ -91,9 +86,9 @@ public class MatchID {
         try {
             Connection connection = dbc.database();
             PreparedStatement preparedStatement = connection.prepareStatement(insertStatement);
-            preparedStatement.setString(1, mMatchID);
-            preparedStatement.setString(2, mMatchSeqNum);
-            preparedStatement.setString(3, mStartTime);
+            preparedStatement.setLong(1, mMatchID);
+            preparedStatement.setLong(2, mMatchSeqNum);
+            preparedStatement.setLong(3, mStartTime);
             preparedStatement.setInt(4, mLobbyType);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
@@ -101,27 +96,27 @@ public class MatchID {
         }
     }
 
-    public static HashMap<String, MatchID> getAllMatches(SQLController dbc) {
+    public static List<MatchID> getAllMatches(SQLController dbc) {
         String selectStatement = "SELECT * FROM match_id";
 
         try {
             Connection connection = dbc.database();
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(selectStatement);
-            HashMap<String, MatchID> matchIDHashMap = new HashMap<>();
+            List<MatchID> matchIDList = new ArrayList<>();
 
             while (resultSet.next()) {
-                String matchId = resultSet.getString("match_id");
+                long matchId = resultSet.getLong("match_id");
                 List<MatchPlayer> matchPlayersList = MatchPlayer.getPlayersInMatch(dbc, matchId);
-                matchIDHashMap.put(matchId, new MatchID(matchId,
-                        resultSet.getString("match_seq_num"),
-                        resultSet.getString("start_time"),
+                matchIDList.add(new MatchID(matchId,
+                        resultSet.getLong("match_seq_num"),
+                        resultSet.getLong("start_time"),
                         resultSet.getInt("lobby_type"),
                         matchPlayersList
                 ));
             }
 
-            return matchIDHashMap;
+            return matchIDList;
         } catch (SQLException e) {
             Logger.getLogger(TAG).log(Level.SEVERE, "Error retrieving table \"match_id\"");
         }
@@ -137,9 +132,9 @@ public class MatchID {
         @Override
         public void createTable(Connection connection) {
             String createStatement = "CREATE TABLE IF NOT EXISTS match_id(id INTEGER PRIMARY KEY NOT NULL, "
-                    + "match_id TEXT NOT NULL, "
-                    + "match_seq_num TEXT NOT NULL, "
-                    + "start_time TEXT NOT NULL, "
+                    + "match_id INTEGER NOT NULL, "
+                    + "match_seq_num INTEGER NOT NULL, "
+                    + "start_time INTEGER NOT NULL, "
                     + "lobby_type INTEGER NOT NULL);";
             try {
                 Statement statement = connection.createStatement();

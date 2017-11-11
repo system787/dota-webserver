@@ -90,19 +90,20 @@ public class Hero {
         }
     }
 
-    public static HashMap<Integer, Hero> getAllHeroes(SQLController dbc) {
+    public static List<Hero> getAllHeroes(SQLController dbc) {
         String selectStatement = "SELECT * FROM heroes";
 
         try {
             Connection connection = dbc.database();
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(selectStatement);
-            HashMap<Integer, Hero> heroHashMap = new HashMap<>();
+            List<Hero> heroList = new ArrayList<>();
             while (resultSet.next()) {
-                int id = resultSet.getInt("id");
-                heroHashMap.put(id, new Hero(id, resultSet.getString("token_name"), resultSet.getString("localized_name")));
+                heroList.add(new Hero(resultSet.getInt("id"),
+                        resultSet.getString("token_name"),
+                        resultSet.getString("localized_name")));
             }
-            return heroHashMap;
+            return heroList;
         } catch (SQLException e) {
             Logger.getLogger(TAG).log(Level.SEVERE, "Error retrieving table \"heroes\"");
         }

@@ -39,7 +39,7 @@ public class HelloWorldController {
     @RequestMapping("/vanityto64")
     public String vanityto64() {
         Logger.getLogger(TAG).log(Level.INFO, "Attempting to get 64bit SteamId from Vanity URL");
-        return mAPIRequest.get64FromVanity("system787");
+        return String.valueOf(mAPIRequest.get64FromVanity("system787"));
     }
 
     @RequestMapping("/getlast25")
@@ -50,11 +50,11 @@ public class HelloWorldController {
     @RequestMapping("/getallheroes")
     public String getAllHeroes() {
         Logger.getLogger(TAG).log(Level.INFO, "Attempting to retrieve all heroes from master server");
-        HashMap<Integer, Hero> heroesHashMap = mAPIRequest.getAllHeroes();
+        List<Hero> heroesList = mAPIRequest.getAllHeroes();
         Logger.getLogger(TAG).log(Level.INFO, "Data received from server");
         StringBuilder sb = new StringBuilder();
 
-        for (Hero h : heroesHashMap.values()) {
+        for (Hero h : heroesList) {
             String output = h.getId() + " " + h.getTokenName() + " " + h.getLocalizedName() + "\n";
             sb.append(output);
         }

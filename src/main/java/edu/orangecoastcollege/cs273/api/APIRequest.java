@@ -114,19 +114,19 @@ public class APIRequest {
      * @param vanity
      * @return
      */
-    public String get64FromVanity(String vanity) {
+    public long get64FromVanity(String vanity) {
         String url = "http://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key=" + API_KEY + "&vanityurl=" + vanity.trim();
         try {
             String json = getJSON(url, REQUEST_TIMEOUT);
             JSONObject response = new JSONObject(json).getJSONObject("response");
             if (response == null) {
-                return null;
+                return -1;
             }
-            return response.getString("steamid");
+            return response.getLong("steamid");
         } catch (JSONException e) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, "JSON exception in retrieving user's 64bit SteamId", e);
         }
-        return null;
+        return -1;
     }
 
     /**
@@ -135,11 +135,11 @@ public class APIRequest {
      * @param steamId64 passed in as a String to be parsed
      * @return 32-bit SteamID stored as a String
      */
-    public String convert64to32(String steamId64) {
-        return String.valueOf(Long.parseLong(steamId64) - 76561197960265728L);
+    public int convert64to32(long steamId64) {
+        return (int) (steamId64 - 76561197960265728L);
     }
 
-    public HashMap<Integer, Hero> getAllHeroes() {
+    public List<Hero> getAllHeroes() {
         String url = "https://api.steampowered.com/IEconDOTA2_570/GetHeroes/v0001/?language=en_US&key=" + API_KEY;
 
         try {
@@ -150,25 +150,27 @@ public class APIRequest {
             }
 
             JSONArray jsonArray = response.getJSONArray("heroes");
-            HashMap<Integer, Hero> heroHashMap = new HashMap<>();
-            //ArrayList<Hero> heroArrayList = new ArrayList<>();
+            List<Hero> heroList = new ArrayList<>();
+
 
             for (Object o : jsonArray) {
                 JSONObject jsonLineItem = (JSONObject) o;
-                int id = jsonLineItem.getInt("id");
-                Hero hero = new Hero(id, jsonLineItem.getString("name"), jsonLineItem.getString("localized_name"));
-                heroHashMap.put(id, hero);
+                Hero hero = new Hero(jsonLineItem.getInt("id"), jsonLineItem.getString("name"), jsonLineItem.getString("localized_name"));
+                heroList.add(hero);
             }
-            return heroHashMap;
+            return heroList;
         } catch (JSONException e) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, "JSON exception in retrieving heroes list from master server", e);
         }
         return null;
     }
 
-    public List<MatchID> getMatches(String id64, int numRequested) {
+    public List<MatchID> getMatches(long id64, int numRequested) {
+        return getMatches(convert64to32(id64), numRequested);
+    }
+
+    public List<MatchID> getMatches(int id32, int numRequested) {
         String requestedAmount = String.valueOf(numRequested);
-        String id32 = convert64to32(id64);
         String url = "https://api.steampowered.com/IDOTA2Match_570/GetMatchHistory/V001/?account_id=" + id32 + "&matches_requested=" + requestedAmount + "&key=" + API_KEY;
 
         try {
@@ -179,14 +181,14 @@ public class APIRequest {
             }
 
             JSONArray jsonArray = response.getJSONArray("matches");
-            ArrayList<MatchID> matchIDArrayList = new ArrayList<>();
+            List<MatchID> matchIDList = new ArrayList<>();
 
             for (Object o : jsonArray) {
                 JSONObject jsonLineItem = (JSONObject) o;
 
                 List<MatchPlayer> matchPlayersList = new ArrayList<>();
                 JSONArray matchPlayersArray = jsonLineItem.getJSONArray("players");
-                String matchId = String.valueOf(jsonLineItem.getLong("match_id"));
+                long matchId = jsonLineItem.getLong("match_id");
 
                 for (Object k : matchPlayersArray) {
                     JSONObject matchPlayerJSON = (JSONObject) k;
@@ -195,15 +197,15 @@ public class APIRequest {
                 }
 
                 MatchID match = new MatchID(matchId,
-                        String.valueOf(jsonLineItem.getLong("match_seq_num")),
-                        String.valueOf(jsonLineItem.getLong("start_time")),
+                        jsonLineItem.getLong("match_seq_num"),
+                        jsonLineItem.getLong("start_time"),
                         jsonLineItem.getInt("lobby_type"),
                         matchPlayersList);
 
-                matchIDArrayList.add(match);
+                matchIDList.add(match);
             }
 
-            return matchIDArrayList;
+            return matchIDList;
         } catch (JSONException e) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, "JSON exception in retrieving the user's last 25 matches", e);
         }

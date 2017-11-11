@@ -10,16 +10,18 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class User {
-    private String mSteamId64;
+    private long mSteamId64;
+    private int mSteamId32;
     private int mPrivacy; // 1 - private; 2 - Friends only; 3 - Friends of Friends; 4 - Users Only; 5 - Public
     private int mProfileState; // 0 - profile not configured; 1 - user has configured profile
     private String mPersonaName;
-    private String mLastLogOff;
+    private long mLastLogOff;
     private String mProfileUrl;
     private String mAvatarUrl;
 
-    public User(String steamId64, int privacy, int profileState, String personaName, String lastLogOff, String profileUrl, String avatarUrl) {
+    public User(long steamId64, int privacy, int profileState, String personaName, long lastLogOff, String profileUrl, String avatarUrl) {
         mSteamId64 = steamId64;
+        mSteamId32 = (int) (steamId64 - 76561197960265728L);
         mPrivacy = privacy;
         mProfileState = profileState;
         mPersonaName = personaName;
@@ -28,11 +30,41 @@ public class User {
         mAvatarUrl = avatarUrl;
     }
 
-    public String getSteamId64() {
+    public User(int steamId32, int privacy, int profileState, String personaName, long lastLogOff, String profileUrl, String avatarUrl) {
+        mSteamId64 = steamId32 + 76561197960265728L;
+        mSteamId32 = steamId32;
+        mPrivacy = privacy;
+        mProfileState = profileState;
+        mPersonaName = personaName;
+        mLastLogOff = lastLogOff;
+        mProfileUrl = profileUrl;
+        mAvatarUrl = avatarUrl;
+    }
+
+    public User(long steamId64, int steamId32, int privacy, int profileState, String personaName, long lastLogOff, String profileUrl, String avatarUrl) {
+        mSteamId64 = steamId64;
+        mSteamId32 = steamId32;
+        mPrivacy = privacy;
+        mProfileState = profileState;
+        mPersonaName = personaName;
+        mLastLogOff = lastLogOff;
+        mProfileUrl = profileUrl;
+        mAvatarUrl = avatarUrl;
+    }
+
+    public int getSteamId32() {
+        return mSteamId32;
+    }
+
+    public void setSteamId32(int steamId32) {
+        mSteamId32 = steamId32;
+    }
+
+    public long getSteamId64() {
         return mSteamId64;
     }
 
-    public void setSteamId64(String steamId64) {
+    public void setSteamId64(long steamId64) {
         mSteamId64 = steamId64;
     }
 
@@ -60,11 +92,11 @@ public class User {
         mPersonaName = personaName;
     }
 
-    public String getLastLogOff() {
+    public long getLastLogOff() {
         return mLastLogOff;
     }
 
-    public void setLastLogOff(String lastLogOff) {
+    public void setLastLogOff(long lastLogOff) {
         mLastLogOff = lastLogOff;
     }
 
@@ -91,22 +123,24 @@ public class User {
 
         User user = (User) o;
 
+        if (mSteamId32 != user.mSteamId32) return false;
+        if (mSteamId64 != user.mSteamId64) return false;
         if (mPrivacy != user.mPrivacy) return false;
         if (mProfileState != user.mProfileState) return false;
-        if (mSteamId64 != null ? !mSteamId64.equals(user.mSteamId64) : user.mSteamId64 != null) return false;
+        if (mLastLogOff != user.mLastLogOff) return false;
         if (mPersonaName != null ? !mPersonaName.equals(user.mPersonaName) : user.mPersonaName != null) return false;
-        if (mLastLogOff != null ? !mLastLogOff.equals(user.mLastLogOff) : user.mLastLogOff != null) return false;
         if (mProfileUrl != null ? !mProfileUrl.equals(user.mProfileUrl) : user.mProfileUrl != null) return false;
         return mAvatarUrl != null ? mAvatarUrl.equals(user.mAvatarUrl) : user.mAvatarUrl == null;
     }
 
     @Override
     public int hashCode() {
-        int result = mSteamId64 != null ? mSteamId64.hashCode() : 0;
+        int result = mSteamId32;
+        result = 31 * result + (int) (mSteamId64 ^ (mSteamId64 >>> 32));
         result = 31 * result + mPrivacy;
         result = 31 * result + mProfileState;
         result = 31 * result + (mPersonaName != null ? mPersonaName.hashCode() : 0);
-        result = 31 * result + (mLastLogOff != null ? mLastLogOff.hashCode() : 0);
+        result = 31 * result + (int) (mLastLogOff ^ (mLastLogOff >>> 32));
         result = 31 * result + (mProfileUrl != null ? mProfileUrl.hashCode() : 0);
         result = 31 * result + (mAvatarUrl != null ? mAvatarUrl.hashCode() : 0);
         return result;
@@ -116,21 +150,22 @@ public class User {
     private static final String TAG = "User";
 
     public void saveToDB(SQLController dbc) {
-        String insertStatement = "INSERT INTO users(steam_id, privacy, profile_state, persona_name, last_log_off, profile_url, avatar_url) VALUES(?,?,?,?,?,?,?)";
+        String insertStatement = "INSERT INTO users(steam_id_long, steam_id, privacy, profile_state, persona_name, last_log_off, profile_url, avatar_url) VALUES(?,?,?,?,?,?,?,?)";
 
         try {
             Connection connection = dbc.database();
             PreparedStatement preparedStatement = connection.prepareStatement(insertStatement);
-            preparedStatement.setString(1, mSteamId64);
-            preparedStatement.setInt(2, mPrivacy);
-            preparedStatement.setInt(3, mProfileState);
-            preparedStatement.setString(4, mPersonaName);
-            preparedStatement.setString(5, mLastLogOff);
-            preparedStatement.setString(6, mProfileUrl);
-            preparedStatement.setString(7, mAvatarUrl);
+            preparedStatement.setLong(1, mSteamId64);
+            preparedStatement.setInt(2, mSteamId32);
+            preparedStatement.setInt(3, mPrivacy);
+            preparedStatement.setInt(4, mProfileState);
+            preparedStatement.setString(5, mPersonaName);
+            preparedStatement.setLong(6, mLastLogOff);
+            preparedStatement.setString(7, mProfileUrl);
+            preparedStatement.setString(8, mAvatarUrl);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            Logger.getLogger(TAG).log(Level.SEVERE, "Error inserting into table \"users\"");
+            Logger.getLogger(TAG).log(Level.SEVERE, "Error inserting into table \"users\"", e);
         }
     }
 
@@ -142,14 +177,14 @@ public class User {
                 + "last_log_off = ? , " // 4
                 + "profile_url = ? , " // 5
                 + "avatar_url = ? " // 6
-                + "WHERE steam_id = ?"; // 7
+                + "WHERE (steam_id_long = ? || steam_id = ?)"; // 7
         try {
             Connection connection = dbc.database();
             PreparedStatement preparedStatement = connection.prepareStatement(updateStatement);
             preparedStatement.setInt(1, mPrivacy);
             preparedStatement.setInt(2, mProfileState);
             preparedStatement.setString(3, mPersonaName);
-            preparedStatement.setString(4, mLastLogOff);
+            preparedStatement.setLong(4, mLastLogOff);
             preparedStatement.setString(5, mProfileUrl);
             preparedStatement.setString(6, mAvatarUrl);
             preparedStatement.executeUpdate();
@@ -158,29 +193,29 @@ public class User {
         }
     }
 
-    public static HashMap<String, User> getAllUsers(SQLController dbc) {
+    public static List<User> getAllUsers(SQLController dbc) {
         String selectStatement = "SELECT * FROM users";
 
         try {
             Connection connection = dbc.database();
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(selectStatement);
-            HashMap<String, User> userHashMap = new HashMap<>();
+            List<User> userList = new ArrayList<>();
 
             while (resultSet.next()) {
-                String steamId = resultSet.getString("steam_id");
-                userHashMap.put(steamId, new User(
-                        steamId,
+                userList.add(new User(
+                        resultSet.getLong("steam_id_long"),
+                        resultSet.getInt("steam_id"),
                         resultSet.getInt("privacy"),
                         resultSet.getInt("profile_state"),
                         resultSet.getString("persona_name"),
-                        resultSet.getString("last_log_off"),
+                        resultSet.getLong("last_log_off"),
                         resultSet.getString("profile_url"),
                         resultSet.getString("avatar_url")
                 ));
             }
 
-            return userHashMap;
+            return userList;
         } catch (SQLException e) {
             Logger.getLogger(TAG).log(Level.SEVERE, "Error retrieving table \"users\"");
         }
@@ -195,11 +230,12 @@ public class User {
         @Override
         public void createTable(Connection connection) {
             String createStatement = "CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY NOT NULL, "
-                    + "steam_id TEXT NOT NULL, "
+                    + "steam_id_long INTEGER NOT NULL, "
+                    + "steam_id INTEGER NOT NULL,"
                     + "privacy INTEGER NOT NULL, "
                     + "profile_state INTEGER NOT NULL, "
                     + "persona_name TEXT NOT NULL, "
-                    + "last_log_off TEXT NOT NULL, "
+                    + "last_log_off INTEGER NOT NULL, "
                     + "profile_url TEXT NOT NULL, "
                     + "avatar_url TEXT NOT NULL);";
 

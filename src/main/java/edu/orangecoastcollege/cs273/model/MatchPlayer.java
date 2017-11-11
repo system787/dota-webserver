@@ -9,23 +9,23 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class MatchPlayer {
-    private String mMatchID;
+    private long mMatchID;
     private int mId32;
     private int mSlot;
     private int mHeroId;
 
-    public MatchPlayer(String matchID, int id32, int slot, int heroId) {
+    public MatchPlayer(long matchID, int id32, int slot, int heroId) {
         mMatchID = matchID;
         mId32 = id32;
         mSlot = slot;
         mHeroId = heroId;
     }
 
-    public String getMatchID() {
+    public long getMatchID() {
         return mMatchID;
     }
 
-    public void setMatchID(String matchID) {
+    public void setMatchID(long matchID) {
         mMatchID = matchID;
     }
 
@@ -61,7 +61,7 @@ public class MatchPlayer {
         try {
             Connection connection = dbc.database();
             PreparedStatement preparedStatement = connection.prepareStatement(insertStatement);
-            preparedStatement.setString(1, mMatchID);
+            preparedStatement.setLong(1, mMatchID);
             preparedStatement.setInt(2, mId32);
             preparedStatement.setInt(3, mSlot);
             preparedStatement.setInt(4, mHeroId);
@@ -72,7 +72,7 @@ public class MatchPlayer {
         }
     }
 
-    public static List<MatchPlayer> getPlayersInMatch(SQLController dbc, String matchID) {
+    public static List<MatchPlayer> getPlayersInMatch(SQLController dbc, long matchID) {
         String selectStatement = "SELECT * FROM match_players WHERE match_id=" + matchID;
         try {
             Connection connection = dbc.database();
@@ -81,7 +81,7 @@ public class MatchPlayer {
             List<MatchPlayer> matchPlayersList = new ArrayList<>();
 
             while (resultSet.next()) {
-                matchPlayersList.add(new MatchPlayer(resultSet.getString(0),
+                matchPlayersList.add(new MatchPlayer(resultSet.getLong(0),
                         resultSet.getInt(1),
                         resultSet.getInt(2),
                         resultSet.getInt(3)));
@@ -102,7 +102,7 @@ public class MatchPlayer {
         @Override
         public void createTable(Connection connection) {
             String createStatement = "CREATE TABLE IF NOT EXISTS match_players(id INTEGER PRIMARY KEY NOT NULL, "
-                    + "match_id TEXT NOT NULL, "
+                    + "match_id INTEGER NOT NULL, "
                     + "id32 INTEGER NOT NULL, "
                     + "slot INTEGER NOT NULL, "
                     + "hero_id INTEGER NOT NULL);";

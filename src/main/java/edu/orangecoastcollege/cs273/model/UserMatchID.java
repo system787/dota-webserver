@@ -11,12 +11,12 @@ public class UserMatchID {
     private static final String TAG = "UserMatchID";
 
     public static void saveUserMatch(SQLController dbc, User user, MatchID match) {
-        String insertStatement = "INSERT INTO user_match(steam_id, match_id) VALUES(?,?)";
+        String insertStatement = "INSERT INTO user_match(steam_id64, match_id) VALUES(?,?)";
         try {
             Connection connection = dbc.database();
             PreparedStatement preparedStatement = connection.prepareStatement(insertStatement);
-            preparedStatement.setString(1, user.getSteamId64());
-            preparedStatement.setString(2, match.getMatchID());
+            preparedStatement.setLong(1, user.getSteamId64());
+            preparedStatement.setLong(2, match.getMatchID());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             Logger.getLogger(TAG).log(Level.SEVERE, "Error inserting into table \"user_match\"");
@@ -48,8 +48,8 @@ public class UserMatchID {
         @Override
         public void createTable(Connection connection) {
             String createStatement = "CREATE TABLE IF NOT EXISTS user_match(id INTEGER PRIMARY KEY NOT NULL, " +
-                    "steam_id TEXT NOT NULL, " +
-                    "match_id TEXT NOT NULL);";
+                    "steam_id64 INTEGER NOT NULL, " +
+                    "match_id INTEGER NOT NULL);";
             try {
                 Statement statement = connection.createStatement();
                 statement.execute(createStatement);
