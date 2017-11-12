@@ -47,7 +47,6 @@ public class APIRequestTest {
     @Before
     public void openNewConnection() throws SQLException {
         mSQLController.openConnection();
-
     }
 
     @After
@@ -145,19 +144,19 @@ public class APIRequestTest {
 
             for (Object o : matchesArray) {
                 JSONObject lineItem = (JSONObject) o;
-                long matchId = lineItem.getLong("match_id");
+                long matchId = Long.valueOf(lineItem.getLong("match_id"));
                 JSONArray matchPlayerArray = lineItem.getJSONArray("players");
                 List<MatchPlayer> matchPlayersList = new ArrayList<>();
 
                 for (Object l : matchPlayerArray) {
                     JSONObject matchPlayerJSON = (JSONObject) l;
-                    MatchPlayer player = new MatchPlayer(matchId, matchPlayerJSON.getInt("account_id"), matchPlayerJSON.getInt("player_slot"), matchPlayerJSON.getInt("hero_id"));
+                    MatchPlayer player = new MatchPlayer(matchId, Long.valueOf(matchPlayerJSON.getLong("account_id")), matchPlayerJSON.getInt("player_slot"), matchPlayerJSON.getInt("hero_id"));
                     matchPlayersList.add(player);
                 }
 
                 MatchID match = new MatchID(matchId,
-                        lineItem.getLong("match_seq_num"),
-                        lineItem.getLong("start_time"),
+                        Long.valueOf(lineItem.getLong("match_seq_num")),
+                        Long.valueOf(lineItem.getLong("start_time")),
                         lineItem.getInt("lobby_type"),
                         matchPlayersList);
 
@@ -176,6 +175,10 @@ public class APIRequestTest {
     public void writeUserMatchToDB() {
         List<MatchID> matchIDList = getMatchIDFromJSON();
         List<User> userList = User.getAllUsers(mSQLController);
+
+        for (MatchID m : matchIDList) {
+            m.saveToDB(mSQLController);
+        }
 
         for (int i = 0; i < userList.size(); i++) {
             User user = userList.get(i);
@@ -199,6 +202,39 @@ public class APIRequestTest {
         writeUserMatchToDB();
 
         HashMap<Long, Long> userMatchIDHashMap = UserMatchID.getAllUserMatch(mSQLController);
+        List<User> allUsersList = User.getAllUsers(mSQLController);
+        List<MatchID> allMatchIDList = MatchID.getAllMatches(mSQLController);
+        HashMap<Long, MatchID> allMatchIDHashMap = new HashMap<Long, MatchID>();
+
+        for (MatchID m : allMatchIDList) {
+            allMatchIDHashMap.put(m.getMatchID(), m);
+            System.out.println(m.toString());
+        }
+
+        int userCount = 0;
+
+        for (User u : allUsersList) {
+            List<MatchID> matchesPlayedByUser = new ArrayList<>();
+
+            if (userMatchIDHashMap.keySet().contains(u.getSteamId32())) {
+                userCount++;
+                System.out.println(u.getPersonaName());
+            }
+
+            for (Long l : userMatchIDHashMap.values()) {
+                matchesPlayedByUser.add(allMatchIDHashMap.get(l));
+                System.out.println(allMatchIDHashMap.get(l).toString());
+            }
+
+            System.out.println("User: " + u.getPersonaName());
+            for (MatchID m : matchesPlayedByUser) {
+                System.out.println(m.toString());
+            }
+        }
+
+        System.out.println(userCount);
+
+
     }
 
 }

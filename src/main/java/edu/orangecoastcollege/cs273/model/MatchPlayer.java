@@ -10,11 +10,11 @@ import java.util.logging.Logger;
 
 public class MatchPlayer {
     private long mMatchID;
-    private int mId32;
+    private long mId32;
     private int mSlot;
     private int mHeroId;
 
-    public MatchPlayer(long matchID, int id32, int slot, int heroId) {
+    public MatchPlayer(long matchID, long id32, int slot, int heroId) {
         mMatchID = matchID;
         mId32 = id32;
         mSlot = slot;
@@ -29,11 +29,11 @@ public class MatchPlayer {
         mMatchID = matchID;
     }
 
-    public int getId32() {
+    public long getId32() {
         return mId32;
     }
 
-    public void setId32(int id32) {
+    public void setId32(long id32) {
         mId32 = id32;
     }
 
@@ -62,7 +62,7 @@ public class MatchPlayer {
             Connection connection = dbc.database();
             PreparedStatement preparedStatement = connection.prepareStatement(insertStatement);
             preparedStatement.setLong(1, mMatchID);
-            preparedStatement.setInt(2, mId32);
+            preparedStatement.setLong(2, mId32);
             preparedStatement.setInt(3, mSlot);
             preparedStatement.setInt(4, mHeroId);
 
