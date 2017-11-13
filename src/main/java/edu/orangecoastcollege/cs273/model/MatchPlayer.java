@@ -57,7 +57,7 @@ public class MatchPlayer {
     private static final String TAG = "MatchPlayers";
 
     public void saveToDB(SQLController dbc) {
-        String insertStatement = "INSERT INTO match_players(match_id, id32, slot, hero_id) VALUES(?, ?, ?, ?)";
+        String insertStatement = "INSERT INTO match_players(match_id, steam_id, slot, hero_id) VALUES(?, ?, ?, ?)";
         try {
             Connection connection = dbc.database();
             PreparedStatement preparedStatement = connection.prepareStatement(insertStatement);
@@ -81,10 +81,10 @@ public class MatchPlayer {
             List<MatchPlayer> matchPlayersList = new ArrayList<>();
 
             while (resultSet.next()) {
-                matchPlayersList.add(new MatchPlayer(resultSet.getLong(0),
-                        resultSet.getInt(1),
-                        resultSet.getInt(2),
-                        resultSet.getInt(3)));
+                matchPlayersList.add(new MatchPlayer(resultSet.getLong("match_id"),
+                        resultSet.getLong("steam_id"),
+                        resultSet.getInt("slot"),
+                        resultSet.getInt("hero_id")));
             }
 
             return matchPlayersList;
@@ -103,7 +103,7 @@ public class MatchPlayer {
         public void createTable(Connection connection) {
             String createStatement = "CREATE TABLE IF NOT EXISTS match_players(id INTEGER PRIMARY KEY NOT NULL, "
                     + "match_id INTEGER NOT NULL, "
-                    + "id32 INTEGER NOT NULL, "
+                    + "steam_id INTEGER NOT NULL, "
                     + "slot INTEGER NOT NULL, "
                     + "hero_id INTEGER NOT NULL);";
 

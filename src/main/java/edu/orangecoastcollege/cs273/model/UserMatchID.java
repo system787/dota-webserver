@@ -3,11 +3,37 @@ package edu.orangecoastcollege.cs273.model;
 import edu.orangecoastcollege.cs273.controller.SQLController;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class UserMatchID {
+    private long mId32;
+    private long mMatchID;
+
+    public UserMatchID(long id32, long matchID) {
+        mId32 = id32;
+        mMatchID = matchID;
+    }
+
+    public long getId32() {
+        return mId32;
+    }
+
+    public void setId32(long id32) {
+        mId32 = id32;
+    }
+
+    public long getMatchID() {
+        return mMatchID;
+    }
+
+    public void setMatchID(long matchID) {
+        mMatchID = matchID;
+    }
+
     private static final String TAG = "UserMatchID";
 
     public static void saveUserMatch(SQLController dbc, User user, MatchID match) {
@@ -23,17 +49,17 @@ public class UserMatchID {
         }
     }
 
-    public static HashMap<Long, Long> getAllUserMatch(SQLController dbc) {
+    public static List<UserMatchID> getAllUserMatch(SQLController dbc) {
         String selectStatement = "SELECT * FROM user_match";
         try {
             Connection connection = dbc.database();
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(selectStatement);
-            HashMap<Long, Long> userMatchIDHashMap = new HashMap<>();
+            List<UserMatchID> userMatchIDList = new ArrayList<>();
             while (resultSet.next()) {
-                userMatchIDHashMap.put(resultSet.getLong("steam_id"), resultSet.getLong("match_id"));
+                userMatchIDList.add(new UserMatchID(resultSet.getLong("steam_id"), resultSet.getLong("match_id")));
             }
-            return userMatchIDHashMap;
+            return userMatchIDList;
         } catch (SQLException e) {
             Logger.getLogger(TAG).log(Level.SEVERE, "Error retrieving table \"user_match\"");
         }

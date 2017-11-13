@@ -22,6 +22,7 @@ import java.util.logging.Logger;
 public class APIRequest {
     private static final String TAG = "APIRequest";
     private static final String API_KEY = APIKey.getAPIKey();
+    private static final String API_KEY_2 = APIKey.getAPIKey2();
     private static final String API_DOMAIN = APIKey.getAPIDomain();
     private static final int REQUEST_TIMEOUT = 15000;
 

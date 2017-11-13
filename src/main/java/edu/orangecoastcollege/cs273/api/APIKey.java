@@ -13,11 +13,24 @@ public class APIKey {
             //Loads properties from properties file
             properties.load(new FileInputStream(new File("api_key.properties")));
             //Grabs the first and only key, uses it to fetch property
-            return properties.getProperty((String) properties.keys().nextElement());
+            return properties.getProperty("apiKey");
         } catch (IOException e) {
             e.printStackTrace();
         }
         return "";
+    }
+
+    public static String getAPIKey2() {
+        Properties properties = new Properties();
+        try {
+            //Loads properties from properties file
+            properties.load(new FileInputStream(new File("api_key.properties")));
+            //Grabs the first and only key, uses it to fetch property
+            return properties.getProperty("apiKey2");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public static String getAPIDomain() {

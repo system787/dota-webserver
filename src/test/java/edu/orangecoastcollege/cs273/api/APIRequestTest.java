@@ -201,7 +201,7 @@ public class APIRequestTest {
     public void checkUserMatchID() {
         writeUserMatchToDB();
 
-        HashMap<Long, Long> userMatchIDHashMap = UserMatchID.getAllUserMatch(mSQLController);
+        List<UserMatchID> userMatchIDList = UserMatchID.getAllUserMatch(mSQLController);
         List<User> allUsersList = User.getAllUsers(mSQLController);
         List<MatchID> allMatchIDList = MatchID.getAllMatches(mSQLController);
         HashMap<Long, MatchID> allMatchIDHashMap = new HashMap<Long, MatchID>();
@@ -216,14 +216,14 @@ public class APIRequestTest {
         for (User u : allUsersList) {
             List<MatchID> matchesPlayedByUser = new ArrayList<>();
 
-            if (userMatchIDHashMap.keySet().contains(u.getSteamId32())) {
+            if (userMatchIDList.contains(u.getSteamId32())) {
                 userCount++;
                 System.out.println(u.getPersonaName());
             }
 
-            for (Long l : userMatchIDHashMap.values()) {
-                matchesPlayedByUser.add(allMatchIDHashMap.get(l));
-                System.out.println(allMatchIDHashMap.get(l).toString());
+            for (UserMatchID userMatchID : userMatchIDList) {
+                matchesPlayedByUser.add(allMatchIDHashMap.get(userMatchID.getMatchID()));
+                System.out.println(allMatchIDHashMap.get(userMatchID.getMatchID()).toString());
             }
 
             System.out.println("User: " + u.getPersonaName());
