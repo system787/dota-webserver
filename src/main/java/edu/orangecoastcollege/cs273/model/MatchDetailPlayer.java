@@ -2,10 +2,9 @@ package edu.orangecoastcollege.cs273.model;
 
 import edu.orangecoastcollege.cs273.controller.SQLController;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -18,12 +17,12 @@ public class MatchDetailPlayer {
     private int mDeaths;
     private int mAssists;
     private int mLeaverStatus;      // 0 - NONE - finished match, no abandon.
-                                    // 1 - DISCONNECTED - player DC, no abandon.
-                                    // 2 - DISCONNECTED_TOO_LONG - player DC > 5min, abandoned.
-                                    // 3 - ABANDONED - player DC, clicked leave, abandoned.
-                                    // 4 - AFK - player AFK, abandoned.
-                                    // 5 - NEVER_CONNECTED - player never connected, no abandon.
-                                    // 6 - NEVER_CONNECTED_TOO_LONG - player took too long to connect, no abandon.
+    // 1 - DISCONNECTED - player DC, no abandon.
+    // 2 - DISCONNECTED_TOO_LONG - player DC > 5min, abandoned.
+    // 3 - ABANDONED - player DC, clicked leave, abandoned.
+    // 4 - AFK - player AFK, abandoned.
+    // 5 - NEVER_CONNECTED - player never connected, no abandon.
+    // 6 - NEVER_CONNECTED_TOO_LONG - player took too long to connect, no abandon.
     private int mGold;
     private int mLastHits;
     private int mDenies;
@@ -38,11 +37,11 @@ public class MatchDetailPlayer {
 
     public MatchDetailPlayer(
             long matchId, long accountId, int heroId, int[] items,
-                             int kills, int deaths, int assists,
-                             int leaverStatus, int gold, int lastHits,
-                             int denies, int GPM, int XPM, int goldSpent,
-                             int heroDamage, int towerDamage, int heroHealing,
-                             int level, MatchDetailPlayerUnit matchDetailPlayerUnit) {
+            int kills, int deaths, int assists,
+            int leaverStatus, int gold, int lastHits,
+            int denies, int GPM, int XPM, int goldSpent,
+            int heroDamage, int towerDamage, int heroHealing,
+            int level, MatchDetailPlayerUnit matchDetailPlayerUnit) {
         mMatchId = matchId;
         mAccountId = accountId;
         mHeroId = heroId;
@@ -220,7 +219,7 @@ public class MatchDetailPlayer {
         mMatchDetailPlayerUnit = matchDetailPlayerUnit;
     }
 
-    private final String TAG = "MatchDetailPlayer";
+    private static final String TAG = "MatchDetailPlayer";
 
     public void saveToDB(SQLController dbc) {
         String insertStatement = "INSERT INTO match_detail_player (match_id, account_id, hero_id, level, " +
@@ -261,6 +260,81 @@ public class MatchDetailPlayer {
         }
 
     }
+
+    public static MatchDetailPlayer getPlayerDetail(SQLController dbc, long matchId, long steamId) {
+        String selectStatement = "SELECT * FROM match_detail_player WHERE (match_id =" + matchId + ") AND (steam_id =" + steamId + ")";
+
+        try {
+            Connection connection = dbc.database();
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(selectStatement);
+            MatchDetailPlayerUnit playerUnit = MatchDetailPlayerUnit.getPlayerUnit(dbc, matchId, steamId);
+
+            MatchDetailPlayer player = new MatchDetailPlayer(
+                    resultSet.getLong("match_id"), resultSet.getLong("steam_id"), resultSet.getInt("hero_id"), getItemArray(resultSet),
+                    resultSet.getInt("kill"), resultSet.getInt("deaths"), resultSet.getInt("assists"), resultSet.getInt("leaver_status"),
+                    resultSet.getInt("gold"), resultSet.getInt("last_hits"), resultSet.getInt("denies"), resultSet.getInt("gpm"),
+                    resultSet.getInt("xpm"), resultSet.getInt("gold_spent"), resultSet.getInt("hero_damage"), resultSet.getInt("tower_damage"),
+                    resultSet.getInt("hero_healing"), resultSet.getInt("level"), playerUnit);
+
+            return player;
+        } catch (SQLException e) {
+            Logger.getLogger(TAG).log(Level.SEVERE, "Error while retrieving player " + steamId + " details in match " + matchId);
+        }
+        return null;
+    }
+
+    public static List<MatchDetailPlayer> getPlayerDetailsList(SQLController dbc, long matchId) {
+        String selectStatement = "SELECT * FROM match_detail_player WHERE (match_id =" + matchId + ")";
+
+        try {
+            Connection connection = dbc.database();
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(selectStatement);
+
+            List<MatchDetailPlayer> playerDetailsList = new ArrayList<>();
+
+            while (resultSet.next()) {
+                long steamId = resultSet.getLong("steam_id");
+                MatchDetailPlayerUnit playerUnit = MatchDetailPlayerUnit.getPlayerUnit(dbc, matchId, steamId);
+
+                MatchDetailPlayer player = new MatchDetailPlayer(
+                        resultSet.getLong("match_id"), steamId, resultSet.getInt("hero_id"), getItemArray(resultSet),
+                        resultSet.getInt("kill"), resultSet.getInt("deaths"), resultSet.getInt("assists"), resultSet.getInt("leaver_status"),
+                        resultSet.getInt("gold"), resultSet.getInt("last_hits"), resultSet.getInt("denies"), resultSet.getInt("gpm"),
+                        resultSet.getInt("xpm"), resultSet.getInt("gold_spent"), resultSet.getInt("hero_damage"), resultSet.getInt("tower_damage"),
+                        resultSet.getInt("hero_healing"), resultSet.getInt("level"), playerUnit);
+                playerDetailsList.add(player);
+            }
+
+            return playerDetailsList;
+        } catch (SQLException e) {
+            Logger.getLogger(TAG).log(Level.SEVERE, "Error while retrieving player details list in match " + matchId);
+        }
+        return null;
+    }
+
+    private static int[] getItemArray(ResultSet rs) throws SQLException {
+        int[] itemArray = new int[6];
+
+        itemArray[0] = rs.getInt("slot_zero");
+        itemArray[1] = rs.getInt("slot_one");
+        itemArray[2] = rs.getInt("slot_two");
+        itemArray[3] = rs.getInt("slot_three");
+        itemArray[4] = rs.getInt("slot_four");
+        itemArray[5] = rs.getInt("slot_five");
+
+        return itemArray;
+    }
+    /*
+        public MatchDetailPlayer(
+            long matchId, long accountId, int heroId, int[] items,
+                             int kills, int deaths, int assists,
+                             int leaverStatus, int gold, int lastHits,
+                             int denies, int GPM, int XPM, int goldSpent,
+                             int heroDamage, int towerDamage, int heroHealing,
+                             int level, MatchDetailPlayerUnit matchDetailPlayerUnit)
+     */
 
     public static class Model extends SQLController.LocalDataBaseModel {
         private static final String TAG = "MatchDetailPlayer.Model";

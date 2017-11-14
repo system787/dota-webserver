@@ -72,7 +72,7 @@ public class MatchDetailPlayerUnit {
     }
 
     public static MatchDetailPlayerUnit getPlayerUnit(SQLController dbc, long matchId, long steamId32) {
-        String selectStatement = "SELECT * FROM player_unit WHERE (match_id =" + matchId + ") AND (steam_id =" + steamId32 + " )";
+        String selectStatement = "SELECT * FROM player_unit WHERE (match_id =" + matchId + ") AND (steam_id =" + steamId32 + ")";
 
         try {
             Connection connection = dbc.database();
@@ -120,7 +120,7 @@ public class MatchDetailPlayerUnit {
                     + "slot_two INTEGER NOT NULL, "
                     + "slot_three INTEGER NOT NULL, "
                     + "slot_four INTEGER NOT NULL, "
-                    + "slot_five INTEGER NOT NULL, "
+                    + "slot_five INTEGER NOT NULL "
                     + ");";
 
             try {
