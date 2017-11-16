@@ -116,6 +116,19 @@ public class User {
         return result;
     }
 
+    @Override
+    public String toString() {
+        return "User{" +
+                "mSteamId32=" + mSteamId32 +
+                ", mPrivacy=" + mPrivacy +
+                ", mProfileState=" + mProfileState +
+                ", mPersonaName='" + mPersonaName + '\'' +
+                ", mLastLogOff=" + mLastLogOff +
+                ", mProfileUrl='" + mProfileUrl + '\'' +
+                ", mAvatarUrl='" + mAvatarUrl + '\'' +
+                '}';
+    }
+
     /* Database Methods */
     private static final String TAG = "User";
 

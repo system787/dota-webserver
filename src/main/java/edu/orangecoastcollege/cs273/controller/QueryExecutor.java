@@ -2,6 +2,7 @@ package edu.orangecoastcollege.cs273.controller;
 
 import edu.orangecoastcollege.cs273.api.APIRequest;
 import edu.orangecoastcollege.cs273.model.MatchID;
+import edu.orangecoastcollege.cs273.model.User;
 
 import java.util.List;
 import java.util.concurrent.*;
@@ -11,13 +12,17 @@ import java.util.logging.Logger;
 public class QueryExecutor {
 
     private static QueryExecutor mInstance;
+
     private static ScheduledExecutorService mUserService;
     private static ScheduledExecutorService mMatchService;
+    private static ScheduledExecutorService mMatchDetailService;
+
     private static final String TAG = "QueryExecutor";
 
     private APIRequest mAPIRequest = new APIRequest();
 
-    public QueryExecutor() {}
+    public QueryExecutor() {
+    }
 
     public static QueryExecutor getInstance() {
         if (mInstance == null) {
@@ -26,25 +31,62 @@ public class QueryExecutor {
 
         mUserService = Executors.newSingleThreadScheduledExecutor();
         mMatchService = Executors.newSingleThreadScheduledExecutor();
+        mMatchDetailService = Executors.newSingleThreadScheduledExecutor();
 
         return mInstance;
     }
 
-    public List<MatchID> getQueryMatchTask(long id32) {
+    public List<MatchID> scheduleQueryMatchTask(long id32) {
         QueryMatchTask queryMatchTask = new QueryMatchTask();
         queryMatchTask.setUser(id32);
-        ScheduledFuture<List<MatchID>> scheduledFuture = mMatchService.schedule(queryMatchTask, 1100, TimeUnit.MILLISECONDS);
-        List<MatchID> matchIDList;
+        ScheduledFuture<List<MatchID>> scheduledFuture = mMatchService.schedule(queryMatchTask, 1050, TimeUnit.MILLISECONDS);
+
         try {
-            matchIDList = scheduledFuture.get();
+            List<MatchID> matchIDList = scheduledFuture.get();
             return matchIDList;
         } catch (InterruptedException e) {
-            Logger.getLogger(TAG).log(Level.SEVERE, "Interrupted exception occurred in getQueryMatchTask", e);
+            Logger.getLogger(TAG).log(Level.SEVERE, "InterruptedException occurred in scheduleQueryMatchTask", e);
         } catch (ExecutionException e) {
-            Logger.getLogger(TAG).log(Level.SEVERE, "ExecutionException occurred in getQueryMatchTask", e);
+            Logger.getLogger(TAG).log(Level.SEVERE, "ExecutionException occurred in scheduleQueryMatchTask", e);
         }
         return null;
     }
+
+    public long scheduleQueryUserId(String vanityName) {
+        QueryUserIdTask userIdTask = new QueryUserIdTask();
+        userIdTask.setUserVanityName(vanityName);
+        ScheduledFuture<Long> scheduledFuture = mUserService.schedule(userIdTask, 1050, TimeUnit.MILLISECONDS);
+
+        try {
+            long userId = scheduledFuture.get();
+            return userId;
+        } catch (InterruptedException e) {
+            Logger.getLogger(TAG).log(Level.SEVERE, "InterruptedException occurred in scheduleQueryUserId", e);
+        } catch (ExecutionException e) {
+            Logger.getLogger(TAG).log(Level.SEVERE, "ExecutionException occurred in scheduleQueryUserId", e);
+        }
+        return -1;
+    }
+
+    public List<User> scheduleQueryUserSummaries(long[] steamId64) {
+        QueryUserSummaries query = new QueryUserSummaries();
+        query.setSteamId64Array(steamId64);
+        ScheduledFuture<List<User>> scheduledFuture = mUserService.schedule(query, 1050, TimeUnit.MILLISECONDS);
+
+        try {
+            List<User> userList = scheduledFuture.get();
+            return userList;
+        } catch (InterruptedException e) {
+            Logger.getLogger(TAG).log(Level.SEVERE, "InterruptedException occurred in scheduleQueryUserSummaries", e);
+        } catch (ExecutionException e) {
+            Logger.getLogger(TAG).log(Level.SEVERE, "ExecutionException occurred in scheduleQueryUserSummaries", e);
+        }
+        return null;
+    }
+
+    /**
+     * Classes for Queries
+     */
 
     private class QueryMatchTask implements Callable<List<MatchID>> {
         private long userId;
@@ -60,6 +102,38 @@ public class QueryExecutor {
                 return null;
             }
             return mAPIRequest.getMatches(userId, numMatches);
+        }
+    }
+
+    private class QueryUserIdTask implements Callable<Long> {
+        private String userVanityName;
+
+        public void setUserVanityName(String vanityName) {
+            userVanityName = vanityName;
+        }
+
+        @Override
+        public Long call() throws Exception {
+            if (userVanityName == null) {
+                return null;
+            }
+            return mAPIRequest.get32FromVanity(userVanityName);
+        }
+    }
+
+    private class QueryUserSummaries implements Callable<List<User>> {
+        private long[] steamId64Array;
+
+        public void setSteamId64Array(long[] array) {
+            steamId64Array = array;
+        }
+
+        @Override
+        public List<User> call() throws Exception {
+            if (steamId64Array == null) {
+                return null;
+            }
+            return mAPIRequest.getUserSummaries(steamId64Array);
         }
     }
 

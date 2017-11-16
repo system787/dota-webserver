@@ -3,6 +3,7 @@ package edu.orangecoastcollege.cs273.api;
 import edu.orangecoastcollege.cs273.model.Hero;
 import edu.orangecoastcollege.cs273.model.MatchID;
 import edu.orangecoastcollege.cs273.model.MatchPlayer;
+import edu.orangecoastcollege.cs273.model.User;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -23,11 +24,11 @@ public class APIRequest {
     private static final String TAG = "APIRequest";
     private static final String API_KEY = APIKey.getAPIKey();
     private static final String API_KEY_2 = APIKey.getAPIKey2();
-    private static final String API_DOMAIN = APIKey.getAPIDomain();
-    private static final int REQUEST_TIMEOUT = 15000;
+    private static final String API_KEY_3 = APIKey.getAPIKey3();
+
+    private static final int REQUEST_TIMEOUT = 3000;
 
     public APIRequest() {
-
     }
 
     /**
@@ -85,30 +86,6 @@ public class APIRequest {
     }
 
     /**
-     * Gets the user's display name using their 64-bit Steam ID
-     *
-     * @param steamId64 specified user's 64-bit Steam ID
-     * @return String containing user's "personaname"/display name
-     */
-    public String getDisplayName(String steamId64) {
-        String url = "http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=" + API_KEY + "&steamids=" + steamId64;
-        try {
-            String json = getJSON(url, REQUEST_TIMEOUT);
-            JSONObject response = new JSONObject(json).getJSONObject("response");
-            if (response == null) {
-                return null;
-            }
-
-            return response.getString("personaname");
-
-        } catch (JSONException e) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, "JSON exception in retrieving user's display name");
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    /**
      * Gets the 64-bit SteamID for a specified user from their vanity url
      * (e.g. "http://steamcommunity.com/id/system787" with "system787" being the part of the vanity url that is used)
      *
@@ -130,14 +107,87 @@ public class APIRequest {
         return -1;
     }
 
+    public long get32FromVanity(String vanity) {
+        return convert64to32(get64FromVanity(vanity));
+    }
+
     /**
      * Converts a 64-bit SteamID to 32 bit format
      *
      * @param steamId64 passed in as a String to be parsed
      * @return 32-bit SteamID stored as a String
      */
-    public int convert64to32(long steamId64) {
-        return (int) (steamId64 - 76561197960265728L);
+    public long convert64to32(long steamId64) {
+        return steamId64 - 76561197960265728L;
+    }
+
+    public long convert32to64(long steamId32) {
+        return steamId32 + 76561197960265728L;
+    }
+
+    public User getUserSummary(long steamId64) {
+        String url = "http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=" + API_KEY_3 + "&steamids=" + steamId64;
+        try {
+            String json = getJSON(url.toString(), REQUEST_TIMEOUT);
+            JSONObject response = new JSONObject(json).getJSONObject("result");
+            if (response == null) {
+                return null;
+            }
+            JSONArray jsonArray = response.getJSONArray("players");
+            JSONObject jObject = jsonArray.getJSONObject(0);
+            User user = new User(convert64to32(jObject.getLong("steamid")),
+                    jObject.getInt("communityvisibilitystate"),
+                    jObject.getInt("profilestate"),
+                    jObject.getString("personaname"),
+                    jObject.getLong("lastlogoff"),
+                    jObject.getString("profileurl"),
+                    jObject.getString("avatarfull"));
+            return user;
+        } catch (JSONException e) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, "JSON exception in retrieving user summaries", e);
+        }
+        return null;
+    }
+
+    public List<User> getUserSummaries(long[] steamId64) {
+        StringBuilder url = new StringBuilder("http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=").append(API_KEY_3).append("&steamids=");
+        if (steamId64.length == 1) {
+            url.append(String.valueOf(steamId64[0]));
+        } else {
+            for (int i = 0; i < steamId64.length; i++) {
+                url.append(String.valueOf(steamId64[i]));
+                if (i + 1 < steamId64.length) {
+                    url.append(",");
+                }
+            }
+        }
+        try {
+            String json = getJSON(url.toString(), REQUEST_TIMEOUT);
+            JSONObject response = new JSONObject(json).getJSONObject("response");
+
+            if (response == null) {
+                return null;
+            }
+
+            JSONArray jsonArray = response.getJSONArray("players");
+            List<User> userList = new ArrayList<>();
+
+            for (Object o : jsonArray) {
+                JSONObject jsonLineItem = (JSONObject) o;
+                User user = new User(convert64to32(jsonLineItem.getLong("steamid")),
+                        jsonLineItem.getInt("communityvisibilitystate"),
+                        jsonLineItem.optInt("profilestate", 0), //jsonLineItem.getInt("profilestate"),
+                        jsonLineItem.getString("personaname"),
+                        jsonLineItem.getLong("lastlogoff"),
+                        jsonLineItem.getString("profileurl"),
+                        jsonLineItem.getString("avatarfull"));
+                userList.add(user);
+            }
+            return userList;
+        } catch (JSONException e) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, "JSON exception in retrieving user summaries", e);
+        }
+        return null;
     }
 
     public List<Hero> getAllHeroes() {
@@ -153,7 +203,6 @@ public class APIRequest {
             JSONArray jsonArray = response.getJSONArray("heroes");
             List<Hero> heroList = new ArrayList<>();
 
-
             for (Object o : jsonArray) {
                 JSONObject jsonLineItem = (JSONObject) o;
                 Hero hero = new Hero(jsonLineItem.getInt("id"), jsonLineItem.getString("name"), jsonLineItem.getString("localized_name"));
@@ -166,11 +215,7 @@ public class APIRequest {
         return null;
     }
 
-    public List<MatchID> getMatches(long id64, int numRequested) {
-        return getMatches(convert64to32(id64), numRequested);
-    }
-
-    public List<MatchID> getMatches(int id32, int numRequested) {
+    public List<MatchID> getMatches(long id32, int numRequested) {
         String requestedAmount = String.valueOf(numRequested);
         String url = "https://api.steampowered.com/IDOTA2Match_570/GetMatchHistory/V001/?account_id=" + id32 + "&matches_requested=" + requestedAmount + "&key=" + API_KEY;
 
@@ -180,6 +225,12 @@ public class APIRequest {
             if (response == null) {
                 return null;
             }
+
+            int statusCode = response.getInt("status");
+            if (statusCode == 15) {
+                return null;
+            }
+
 
             JSONArray jsonArray = response.getJSONArray("matches");
             List<MatchID> matchIDList = new ArrayList<>();
@@ -205,6 +256,7 @@ public class APIRequest {
 
                 matchIDList.add(match);
             }
+
 
             return matchIDList;
         } catch (JSONException e) {
