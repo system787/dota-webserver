@@ -1,6 +1,7 @@
 package edu.orangecoastcollege.cs273.controller;
 
 import edu.orangecoastcollege.cs273.api.APIRequest;
+import edu.orangecoastcollege.cs273.model.MatchDetails;
 import edu.orangecoastcollege.cs273.model.MatchID;
 import edu.orangecoastcollege.cs273.model.User;
 
@@ -87,6 +88,24 @@ public class QueryExecutor {
     /**
      * Classes for Queries
      */
+
+    private class QueryMatchDetailsTask implements Callable<MatchDetails> {
+        // TODO: finish query match details executor
+
+        private long matchId;
+
+        public void setMatchId(long id) {
+            matchId = id;
+        }
+
+        @Override
+        public MatchDetails call() throws Exception {
+            if (matchId == 0) {
+                return null;
+            }
+            return null;
+        }
+    }
 
     private class QueryMatchTask implements Callable<List<MatchID>> {
         private long userId;

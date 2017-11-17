@@ -20,24 +20,27 @@ public class QueryExecutorTest {
         mQueryExecutor = QueryExecutor.getInstance();
     }
 
-   // @Test
-   //public void getQueryMatchTask() throws Exception {
-   //    List<MatchID> matchIDList = new ArrayList<>();
-   //    long[] idList = { 97942759L, 4294967295L, 114611L, 49973220L, 101892699L, 39974939L };
-   //
-   //    for (long l : idList) {
-   //        List<MatchID> tempList = mQueryExecutor.scheduleQueryMatchTask(l);
+    @Test
+    public void getQueryMatchTask() throws Exception {
+        List<MatchID> matchIDList = new ArrayList<>();
+        long[] idList = {97942759L, 4294967295L, 114611L, 49973220L, 101892699L, 39974939L};
 
+        for (long l : idList) {
+            List<MatchID> tempList = mQueryExecutor.scheduleQueryMatchTask(l);
 
-   //        for (MatchID m : tempList) {
-   //            matchIDList.add(m);
-   //        }
-   //    }
+            if (tempList == null) {
+                return;
+            }
 
-   //    for (MatchID m : matchIDList) {
-   //        System.out.println(m.toString());
-   //    }
-   //}
+            for (MatchID m : tempList) {
+                matchIDList.add(m);
+            }
+
+            for (MatchID m : matchIDList) {
+                System.out.println(m.toString());
+            }
+        }
+    }
 
     @Test
     public void testQueryChain() throws Exception {

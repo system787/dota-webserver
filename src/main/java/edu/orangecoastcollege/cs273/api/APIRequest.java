@@ -1,9 +1,6 @@
 package edu.orangecoastcollege.cs273.api;
 
-import edu.orangecoastcollege.cs273.model.Hero;
-import edu.orangecoastcollege.cs273.model.MatchID;
-import edu.orangecoastcollege.cs273.model.MatchPlayer;
-import edu.orangecoastcollege.cs273.model.User;
+import edu.orangecoastcollege.cs273.model.*;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -262,6 +259,26 @@ public class APIRequest {
         } catch (JSONException e) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, "JSON exception in retrieving the user's last 25 matches", e);
         }
+        return null;
+    }
+
+    public MatchDetails getMatchDetails(long matchId) {
+        String url = "http://api.steampowered.com/IDOTA2Match_<ID>/GetMatchDetails/v1/?key=" + API_KEY_3 + "&match_id=" + matchId;
+
+        try {
+            String json = getJSON(url, REQUEST_TIMEOUT);
+            JSONObject response = new JSONObject(json).getJSONObject("result");
+            if (response == null) {
+                return null;
+            }
+
+            // TODO: make private classes for readability
+            // First create player units, then player details, then match details
+
+        } catch (JSONException e) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, "JSON exception in retrieving match details for match " + matchId, e);
+        }
+
         return null;
     }
 
