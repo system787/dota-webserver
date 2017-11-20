@@ -270,9 +270,17 @@ public class MatchDetailPlayer {
             ResultSet resultSet = statement.executeQuery(selectStatement);
             MatchDetailPlayerUnit playerUnit = MatchDetailPlayerUnit.getPlayerUnit(dbc, matchId, steamId);
 
+            int[] itemArray = new int[6];
+            itemArray[0] = resultSet.getInt("slot_zero");
+            itemArray[1] = resultSet.getInt("slot_one");
+            itemArray[2] = resultSet.getInt("slot_two");
+            itemArray[3] = resultSet.getInt("slot_three");
+            itemArray[4] = resultSet.getInt("slot_four");
+            itemArray[5] = resultSet.getInt("slot_five");
+
             MatchDetailPlayer player = new MatchDetailPlayer(
-                    resultSet.getLong("match_id"), resultSet.getLong("steam_id"), resultSet.getInt("hero_id"), getItemArray(resultSet),
-                    resultSet.getInt("kill"), resultSet.getInt("deaths"), resultSet.getInt("assists"), resultSet.getInt("leaver_status"),
+                    resultSet.getLong("match_id"), resultSet.getLong("steam_id"), resultSet.getInt("hero_id"), itemArray,
+                    resultSet.getInt("kills"), resultSet.getInt("deaths"), resultSet.getInt("assists"), resultSet.getInt("leaver_status"),
                     resultSet.getInt("gold"), resultSet.getInt("last_hits"), resultSet.getInt("denies"), resultSet.getInt("gpm"),
                     resultSet.getInt("xpm"), resultSet.getInt("gold_spent"), resultSet.getInt("hero_damage"), resultSet.getInt("tower_damage"),
                     resultSet.getInt("hero_healing"), resultSet.getInt("level"), playerUnit);
@@ -298,12 +306,33 @@ public class MatchDetailPlayer {
                 long steamId = resultSet.getLong("steam_id");
                 MatchDetailPlayerUnit playerUnit = MatchDetailPlayerUnit.getPlayerUnit(dbc, matchId, steamId);
 
-                MatchDetailPlayer player = new MatchDetailPlayer(
-                        resultSet.getLong("match_id"), steamId, resultSet.getInt("hero_id"), getItemArray(resultSet),
-                        resultSet.getInt("kill"), resultSet.getInt("deaths"), resultSet.getInt("assists"), resultSet.getInt("leaver_status"),
-                        resultSet.getInt("gold"), resultSet.getInt("last_hits"), resultSet.getInt("denies"), resultSet.getInt("gpm"),
-                        resultSet.getInt("xpm"), resultSet.getInt("gold_spent"), resultSet.getInt("hero_damage"), resultSet.getInt("tower_damage"),
-                        resultSet.getInt("hero_healing"), resultSet.getInt("level"), playerUnit);
+                int[] itemArray = new int[6];
+                itemArray[0] = resultSet.getInt("slot_zero");
+                itemArray[1] = resultSet.getInt("slot_one");
+                itemArray[2] = resultSet.getInt("slot_two");
+                itemArray[3] = resultSet.getInt("slot_three");
+                itemArray[4] = resultSet.getInt("slot_four");
+                itemArray[5] = resultSet.getInt("slot_five");
+
+                MatchDetailPlayer player = new MatchDetailPlayer(resultSet.getLong("match_id"),
+                        resultSet.getLong("steam_id"),
+                        resultSet.getInt("hero_id"),
+                        itemArray,
+                        resultSet.getInt("kills"),
+                        resultSet.getInt("deaths"),
+                        resultSet.getInt("assists"),
+                        resultSet.getInt("leaver_status"),
+                        resultSet.getInt("gold"),
+                        resultSet.getInt("last_hits"),
+                        resultSet.getInt("denies"),
+                        resultSet.getInt("gpm"),
+                        resultSet.getInt("xpm"),
+                        resultSet.getInt("gold_spent"),
+                        resultSet.getInt("hero_damage"),
+                        resultSet.getInt("tower_damage"),
+                        resultSet.getInt("hero_healing"),
+                        resultSet.getInt("level"),
+                        playerUnit);
                 playerDetailsList.add(player);
             }
 
@@ -314,18 +343,6 @@ public class MatchDetailPlayer {
         return null;
     }
 
-    private static int[] getItemArray(ResultSet rs) throws SQLException {
-        int[] itemArray = new int[6];
-
-        itemArray[0] = rs.getInt("slot_zero");
-        itemArray[1] = rs.getInt("slot_one");
-        itemArray[2] = rs.getInt("slot_two");
-        itemArray[3] = rs.getInt("slot_three");
-        itemArray[4] = rs.getInt("slot_four");
-        itemArray[5] = rs.getInt("slot_five");
-
-        return itemArray;
-    }
     /*
         public MatchDetailPlayer(
             long matchId, long accountId, int heroId, int[] items,
@@ -345,32 +362,31 @@ public class MatchDetailPlayer {
 
         @Override
         public void createTable(Connection connection) {
-            String createStatement = "CREATE TABLE IF NOT EXISTS match_detail_player(id INTEGER PRIMARY KEY NOT NULL, "
-                    + "match_id INTEGER NOT NULL, "
-                    + "account_id INTEGER NOT NULL, "
-                    + "hero_id INTEGER NOT NULL, "
-                    + "level INTEGER NOT NULL, "
-                    + "kills INTEGER NOT NULL, "
-                    + "deaths INTEGER NOT NULL, "
-                    + "assists INTEGER NOT NULL, "
-                    + "leaver_status INTEGER NOT NULL, "
-                    + "gold INTEGER NOT NULL, "
-                    + "last_hits INTEGER NOT NULL, "
-                    + "denies INTEGER NOT NULL, "
-                    + "gpm INTEGER NOT NULL, "
-                    + "xpm INTEGER NOT NULL, "
-                    + "gold_spent INTEGER NOT NULL, "
-                    + "hero_damage INTEGER NOT NULL, "
-                    + "tower_damage INTEGER NOT NULL, "
-                    + "hero_healing INTEGER NOT NULL, "
-                    + "slot_zero INTEGER NOT NULL, "
-                    + "slot_one INTEGER NOT NULL, "
-                    + "slot_two INTEGER NOT NULL, "
-                    + "slot_three INTEGER NOT NULL, "
-                    + "slot_four INTEGER NOT NULL, "
-                    + "slot_five INTEGER NOT NULL"
+            String createStatement = "CREATE TABLE IF NOT EXISTS player_list("
+                    + "match_id BIGINT NOT NULL, "
+                    + "account_id BIGINT NOT NULL, "
+                    + "hero_id INT NOT NULL, "
+                    + "level INT NOT NULL, "
+                    + "kills INT NOT NULL, "
+                    + "deaths INT NOT NULL, "
+                    + "assists INT NOT NULL, "
+                    + "leaver_status INT NOT NULL, "
+                    + "gold INT NOT NULL, "
+                    + "last_hits INT NOT NULL, "
+                    + "denies INT NOT NULL, "
+                    + "gpm INT NOT NULL, "
+                    + "xpm INT NOT NULL, "
+                    + "gold_spent INT NOT NULL, "
+                    + "hero_damage INT NOT NULL, "
+                    + "tower_damage INT NOT NULL, "
+                    + "hero_healing INT NOT NULL, "
+                    + "slot_zero INT NOT NULL, "
+                    + "slot_one INT NOT NULL, "
+                    + "slot_two INT NOT NULL, "
+                    + "slot_three INT NOT NULL, "
+                    + "slot_four INT NOT NULL, "
+                    + "slot_five INT NOT NULL"
                     + ");";
-
             try {
                 Statement statement = connection.createStatement();
                 statement.execute(createStatement);

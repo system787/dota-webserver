@@ -183,16 +183,15 @@ public class MatchDetails {
 
         @Override
         public void createTable(Connection connection) {
-            String createStatement = "CREATE TABLE IF NOT EXISTS match_details(id INTEGER PRIMARY KEY, "
-                    + "match_id INTEGER NOT NULL, "
-                    + "match_seq_num INTEGER NOT NULL, "
-                    + "duration INTEGER NOT NULL, "
-                    + "first_blood INTEGER NOT NULL, "
-                    + "num_players INTEGER NOT NULL, "
-                    + "game_mode INTEGER NOT NULL, "
-                    + "radiant_win INTEGER NOT NULL"
-                    + ");";
-
+            String createStatement = "CREATE TABLE match_details(" +
+                    "match_id BIGINT PRIMARY KEY NOT NULL, " +
+                    "match_seq_num BIGINT NOT NULL, " +
+                    "radiant_win INT NOT NULL, " +
+                    "duration INT NOT NULL, " +
+                    "first_blood INT NOT NULL, " +
+                    "lobby_type INT NOT NULL, " +
+                    "num_players INT NOT NULL, " +
+                    "game_mode INT NOT NULL);";
             try {
                 Statement statement = connection.createStatement();
                 statement.execute(createStatement);

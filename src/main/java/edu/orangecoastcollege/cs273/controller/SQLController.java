@@ -32,9 +32,7 @@ public final class SQLController {
     private final LocalDataBaseModel[] models = new LocalDataBaseModel[]{
             // add local database models here
             // format { new Object.Model(), new Object2.Model() };
-            new Hero.Model(), new MatchPlayer.Model(),
-            new MatchID.Model(), new UserMatchID.Model(),
-            new User.Model()
+            new Hero.Model(), new MatchID.Model(), new User.Model()
     };
 
     public synchronized static SQLController getInstance() {

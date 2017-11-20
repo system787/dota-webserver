@@ -235,21 +235,16 @@ public class APIRequest {
             for (Object o : jsonArray) {
                 JSONObject jsonLineItem = (JSONObject) o;
 
-                List<MatchPlayer> matchPlayersList = new ArrayList<>();
+                List<Long> playersList = new ArrayList<>();
                 JSONArray matchPlayersArray = jsonLineItem.getJSONArray("players");
                 long matchId = jsonLineItem.getLong("match_id");
 
                 for (Object k : matchPlayersArray) {
                     JSONObject matchPlayerJSON = (JSONObject) k;
-                    MatchPlayer player = new MatchPlayer(matchId, matchPlayerJSON.getInt("account_id"), matchPlayerJSON.getInt("player_slot"), matchPlayerJSON.getInt("hero_id"));
-                    matchPlayersList.add(player);
+                    playersList.add(((JSONObject) k).getLong("account_id"));
                 }
 
-                MatchID match = new MatchID(matchId,
-                        jsonLineItem.getLong("match_seq_num"),
-                        jsonLineItem.getLong("start_time"),
-                        jsonLineItem.getInt("lobby_type"),
-                        matchPlayersList);
+                MatchID match = new MatchID(matchId, playersList);
 
                 matchIDList.add(match);
             }
@@ -262,8 +257,9 @@ public class APIRequest {
         return null;
     }
 
-    public MatchDetails getMatchDetails(long matchId) {
-        String url = "http://api.steampowered.com/IDOTA2Match_<ID>/GetMatchDetails/v1/?key=" + API_KEY_3 + "&match_id=" + matchId;
+    // TODO: varargs parameter
+    public List<MatchDetails> getMatchDetails(long[] matchId) {
+        String url = "http://api.steampowered.com/IDOTA2Match_570/GetMatchDetails/v1/?key=" + API_KEY_3 + "&match_id=" + matchId;
 
         try {
             String json = getJSON(url, REQUEST_TIMEOUT);
@@ -272,8 +268,22 @@ public class APIRequest {
                 return null;
             }
 
+            // TODO: figure out a different way to grab nested JSON arrays
+            // this method wont work if it gets all additional units as part of one array
+            JSONArray playersArray = response.getJSONArray("players");
+            List<MatchDetailPlayer> playerList = new ArrayList<>();
+
+            for (Object o : playersArray) {
+                JSONArray playerUnitArray = response.getJSONObject("players").getJSONArray("additional_units");
+                //MatchDetailPlayerUnit playerUnit = new MatchDetailPlayerUnit(playerUnitArray);
+            }
+
+
+
             // TODO: make private classes for readability
             // First create player units, then player details, then match details
+
+
 
         } catch (JSONException e) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, "JSON exception in retrieving match details for match " + matchId, e);
