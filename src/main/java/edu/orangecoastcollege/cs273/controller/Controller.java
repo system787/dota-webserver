@@ -24,8 +24,6 @@ public class Controller {
     private static final String API_KEY_2 = APIKey.getAPIKey2();
     private static final String API_KEY_3 = APIKey.getAPIKey3();
 
-    // TODO: create MatchDetails class and MatchIDMatchDetails class
-
     private Controller() {
 
     }

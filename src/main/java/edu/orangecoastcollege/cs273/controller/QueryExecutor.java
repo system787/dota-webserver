@@ -20,7 +20,7 @@ public class QueryExecutor {
 
     private static final String TAG = "QueryExecutor";
 
-    private APIRequest mAPIRequest = new APIRequest();
+    private Controller mController = Controller.getInstance();
 
     public QueryExecutor() {
     }
@@ -120,7 +120,7 @@ public class QueryExecutor {
             if (userId == 0) {
                 return null;
             }
-            return mAPIRequest.getMatches(userId, numMatches);
+            return mController.getMatches(userId, numMatches);
         }
     }
 
@@ -136,7 +136,7 @@ public class QueryExecutor {
             if (userVanityName == null) {
                 return null;
             }
-            return mAPIRequest.get32FromVanity(userVanityName);
+            return mController.get32FromVanity(userVanityName);
         }
     }
 
@@ -152,7 +152,7 @@ public class QueryExecutor {
             if (steamId64Array == null) {
                 return null;
             }
-            return mAPIRequest.getUserSummaries(steamId64Array);
+            return mController.getUserSummaries(steamId64Array);
         }
     }
 
