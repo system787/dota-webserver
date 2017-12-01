@@ -12,7 +12,6 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -258,38 +257,107 @@ public class APIRequest {
     }
 
     // TODO: varargs parameter
-    public List<MatchDetails> getMatchDetails(long[] matchId) {
-        String url = "http://api.steampowered.com/IDOTA2Match_570/GetMatchDetails/v1/?key=" + API_KEY_3 + "&match_id=" + matchId;
+    public List<MatchDetails> getMatchDetails(long[] matchIdArray) {
+        List<MatchDetails> matchDetailsList = new ArrayList<>();
 
-        try {
-            String json = getJSON(url, REQUEST_TIMEOUT);
-            JSONObject response = new JSONObject(json).getJSONObject("result");
-            if (response == null) {
-                return null;
+        for (long matchId : matchIdArray) {
+            String url = "http://api.steampowered.com/IDOTA2Match_570/GetMatchDetails/v1/?key=" + API_KEY_3 + "&match_id=" + matchId;
+            try {
+                String json = getJSON(url, REQUEST_TIMEOUT);
+                JSONObject response = new JSONObject(json).getJSONObject("result");
+                if (response == null) {
+                    return null;
+                }
+
+                JSONArray playersArray = response.getJSONArray("players");
+                List<MatchDetailPlayer> playerList = getPlayersList(playersArray, matchId);
+
+                long matchSeqNum = response.getLong("match_seq_num");
+
+                boolean radiantWin = response.getBoolean("radiant_win");
+                int duration = response.getInt("duration");
+                int firstBloodTime = response.getInt("first_blood_time");
+                int lobbyType = response.getInt("lobby_type");
+                int numPlayers = response.getInt("human_players");
+                int gameMode = response.getInt("game_mode");
+
+                MatchDetails match = new MatchDetails(matchId, matchSeqNum, playerList,
+                        radiantWin, duration, firstBloodTime,
+                        lobbyType, numPlayers, gameMode);
+
+                matchDetailsList.add(match);
+
+            } catch (JSONException e) {
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, "JSON exception in retrieving match details for match " + matchId, e);
             }
 
-            // TODO: figure out a different way to grab nested JSON arrays
-            // this method wont work if it gets all additional units as part of one array
-            JSONArray playersArray = response.getJSONArray("players");
-            List<MatchDetailPlayer> playerList = new ArrayList<>();
-
-            for (Object o : playersArray) {
-                JSONArray playerUnitArray = response.getJSONObject("players").getJSONArray("additional_units");
-                //MatchDetailPlayerUnit playerUnit = new MatchDetailPlayerUnit(playerUnitArray);
-            }
-
-
-
-            // TODO: make private classes for readability
-            // First create player units, then player details, then match details
-
-
-
-        } catch (JSONException e) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, "JSON exception in retrieving match details for match " + matchId, e);
         }
 
-        return null;
+        return matchDetailsList;
+    }
+
+    private List<MatchDetailPlayer> getPlayersList(JSONArray playersArray, long matchId) {
+        List<MatchDetailPlayer> playerList = new ArrayList<>();
+
+        // TODO: figure out a different way to grab nested JSON arrays
+        // this method wont work if it gets all additional units as part of one array
+
+
+        int arrayLength = playersArray.length();
+        for (int i = 0; i < arrayLength; i++) {
+            JSONObject playerJSON = playersArray.getJSONObject(i);
+
+            long playerId = playerJSON.getLong("account_id");
+            int heroId = playerJSON.getInt("hero_id");
+            int[] itemArray = new int[]{playerJSON.getInt("item_0"), playerJSON.getInt("item_1"),
+                    playerJSON.getInt("item_2"), playerJSON.getInt("item_3"),
+                    playerJSON.getInt("item_4"), playerJSON.getInt("item_5")};
+            int kills = playerJSON.getInt("kills");
+            int deaths = playerJSON.getInt("deaths");
+            int assists = playerJSON.getInt("assists");
+            int leaverStatus = playerJSON.getInt("leaver_status");
+            int gold = playerJSON.getInt("gold");
+            int lastHits = playerJSON.getInt("last_hits");
+            int denies = playerJSON.getInt("denies");
+            int gpm = playerJSON.getInt("gold_per_min");
+            int xpm = playerJSON.getInt("xp_per_min");
+            int goldSpent = playerJSON.getInt("gold_spent");
+            int heroDamage = playerJSON.getInt("hero_damage");
+            int towerDamage = playerJSON.getInt("tower_damage");
+            int heroHealing = playerJSON.getInt("hero_healing");
+            int level = playerJSON.getInt("level");
+
+
+            MatchDetailPlayer player = new MatchDetailPlayer(matchId, playerId, heroId, itemArray,
+                    kills, deaths, assists, leaverStatus,
+                    gold, lastHits, denies, gpm, xpm,
+                    goldSpent, heroDamage, towerDamage, heroHealing,
+                    level);
+
+
+            try {
+                JSONObject playerUnitObject = playerJSON.getJSONObject("additional_units");
+
+                int[] unitItemArray = new int[]{playerUnitObject.getInt("item_0"),
+                        playerUnitObject.getInt("item_1"),
+                        playerUnitObject.getInt("item_2"),
+                        playerUnitObject.getInt("item_3"),
+                        playerUnitObject.getInt("item_4"),
+                        playerUnitObject.getInt("item_5")};
+
+                MatchDetailPlayerUnit playerUnit = new MatchDetailPlayerUnit(
+                        matchId, playerId, playerUnitObject.getString("unitname"), unitItemArray);
+
+                player.setMatchDetailPlayerUnit(playerUnit);
+            } catch (JSONException e) {
+                Logger.getLogger(TAG).log(Level.INFO, "Player " + playerJSON.getLong("account_id")
+                        + " does not have a unit");
+            }
+            playerList.add(player);
+
+        }
+
+        return playerList;
     }
 
 }

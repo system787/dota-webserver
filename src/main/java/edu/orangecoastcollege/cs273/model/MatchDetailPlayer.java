@@ -63,8 +63,29 @@ public class MatchDetailPlayer {
         mMatchDetailPlayerUnit = matchDetailPlayerUnit;
     }
 
-    public MatchDetailPlayer() {
-
+    public MatchDetailPlayer(long mMatchId, long mAccountId, int mHeroId, int[] mItems,
+                             int mKills, int mDeaths, int mAssists, int mLeaverStatus,
+                             int mGold, int mLastHits, int mDenies, int mGPM, int mXPM,
+                             int mGoldSpent, int mHeroDamage, int mTowerDamage, int mHeroHealing,
+                             int mLevel) {
+        this.mMatchId = mMatchId;
+        this.mAccountId = mAccountId;
+        this.mHeroId = mHeroId;
+        this.mItems = mItems;
+        this.mKills = mKills;
+        this.mDeaths = mDeaths;
+        this.mAssists = mAssists;
+        this.mLeaverStatus = mLeaverStatus;
+        this.mGold = mGold;
+        this.mLastHits = mLastHits;
+        this.mDenies = mDenies;
+        this.mGPM = mGPM;
+        this.mXPM = mXPM;
+        this.mGoldSpent = mGoldSpent;
+        this.mHeroDamage = mHeroDamage;
+        this.mTowerDamage = mTowerDamage;
+        this.mHeroHealing = mHeroHealing;
+        this.mLevel = mLevel;
     }
 
     public long getMatchId() {
@@ -212,6 +233,10 @@ public class MatchDetailPlayer {
     }
 
     public MatchDetailPlayerUnit getMatchDetailPlayerUnit() {
+        if (mMatchDetailPlayerUnit == null) {
+            Logger.getLogger(TAG).log(Level.SEVERE,"Player " + String.valueOf(mAccountId) + " does not have a unit");
+        }
+
         return mMatchDetailPlayerUnit;
     }
 
