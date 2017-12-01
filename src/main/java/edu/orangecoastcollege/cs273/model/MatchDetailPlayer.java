@@ -410,7 +410,8 @@ public class MatchDetailPlayer {
                     + "slot_two INT NOT NULL, "
                     + "slot_three INT NOT NULL, "
                     + "slot_four INT NOT NULL, "
-                    + "slot_five INT NOT NULL"
+                    + "slot_five INT NOT NULL,"
+                    + "UNIQUE (match_id, account_id)"
                     + ");";
             try {
                 Statement statement = connection.createStatement();

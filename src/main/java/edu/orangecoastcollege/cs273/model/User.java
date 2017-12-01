@@ -210,14 +210,16 @@ public class User {
 
         @Override
         public void createTable(Connection connection) {
-            String createStatement = "CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY NOT NULL, "
+            String createStatement = "CREATE TABLE IF NOT EXISTS users("
                     + "steam_id INTEGER NOT NULL,"
                     + "privacy INTEGER NOT NULL, "
                     + "profile_state INTEGER NOT NULL, "
                     + "persona_name TEXT NOT NULL, "
                     + "last_log_off INTEGER NOT NULL, "
                     + "profile_url TEXT NOT NULL, "
-                    + "avatar_url TEXT NOT NULL);";
+                    + "avatar_url TEXT NOT NULL, "
+                    + "UNIQUE (steam_id)"
+                    + ");";
 
             try {
                 Statement statement = connection.createStatement();

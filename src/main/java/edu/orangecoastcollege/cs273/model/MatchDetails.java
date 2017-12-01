@@ -191,7 +191,9 @@ public class MatchDetails {
                     "first_blood INT NOT NULL, " +
                     "lobby_type INT NOT NULL, " +
                     "num_players INT NOT NULL, " +
-                    "game_mode INT NOT NULL);";
+                    "game_mode INT NOT NULL, " +
+                    "UNIQUE (match_id)" +
+                    ");";
             try {
                 Statement statement = connection.createStatement();
                 statement.execute(createStatement);

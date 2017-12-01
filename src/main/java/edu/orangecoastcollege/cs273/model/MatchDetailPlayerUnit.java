@@ -111,7 +111,7 @@ public class MatchDetailPlayerUnit {
         @Override
         public void createTable(Connection connection) {
 
-            String createStatement = "CREATE TABLE IF NOT EXISTS player_unit(id INTEGER PRIMARY KEY NOT NULL, "
+            String createStatement = "CREATE TABLE IF NOT EXISTS player_unit("
                     + "match_id INTEGER NOT NULL, "
                     + "steam_id INTEGER NOT NULL, "
                     + "unit_name TEXT NOT NULL, "
@@ -120,7 +120,8 @@ public class MatchDetailPlayerUnit {
                     + "slot_two INTEGER NOT NULL, "
                     + "slot_three INTEGER NOT NULL, "
                     + "slot_four INTEGER NOT NULL, "
-                    + "slot_five INTEGER NOT NULL "
+                    + "slot_five INTEGER NOT NULL, "
+                    + "UNIQUE (match_id, steam_id) "
                     + ");";
 
             try {
