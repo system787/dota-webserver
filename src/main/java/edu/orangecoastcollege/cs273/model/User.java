@@ -4,7 +4,6 @@ import edu.orangecoastcollege.cs273.controller.SQLController;
 
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -173,6 +172,25 @@ public class User {
         } catch (SQLException e) {
             Logger.getLogger(TAG).log(Level.SEVERE, "Error updating user " + mSteamId32);
         }
+    }
+
+    public static List<Long> getAllUserId(SQLController dbc) {
+        String selectStatement = "SELECT steam_id FROM users";
+        try {
+            Connection connection = dbc.database();
+            Statement statement = connection.createStatement();
+            ResultSet rs = statement.executeQuery(selectStatement);
+            List<Long> userIdList = new ArrayList<>();
+
+            while (rs.next()) {
+                userIdList.add(rs.getLong("steam_id"));
+            }
+
+            return userIdList;
+        } catch (SQLException e) {
+            Logger.getLogger(TAG).log(Level.SEVERE, "Error retrieving list of steam ids");
+        }
+        return null;
     }
 
     public static List<User> getAllUsers(SQLController dbc) {
