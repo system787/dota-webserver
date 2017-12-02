@@ -1,5 +1,6 @@
 package edu.orangecoastcollege.cs273.controller;
 
+import com.google.gson.Gson;
 import edu.orangecoastcollege.cs273.api.APIRequest;
 import edu.orangecoastcollege.cs273.model.*;
 
@@ -190,6 +191,13 @@ public class Controller {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public String toGson(Object o) {
+        Gson gson = new Gson();
+        String output = gson.toJson(o);
+
+        return output;
     }
 
 }

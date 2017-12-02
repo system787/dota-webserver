@@ -41,7 +41,5 @@ dependencies {
     // tag::actuator[]
     compile("org.springframework.boot:spring-boot-starter-actuator")
     // end::actuator[]
-    testCompile group: 'junit', name: 'junit', version: '5.0'
-    compile 'org.junit.jupiter:junit-jupiter-api'
-    compile 'junit:junit:5.0'
+    testCompile group: 'junit', name: 'junit', version: '4.1'
 }
