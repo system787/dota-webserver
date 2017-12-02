@@ -1,7 +1,6 @@
 package edu.orangecoastcollege.cs273.model;
 
 import edu.orangecoastcollege.cs273.controller.SQLController;
-import sun.rmi.runtime.Log;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -115,7 +114,7 @@ public class MatchID {
                 Statement statement = connection.createStatement();
                 statement.execute(createStatement);
             } catch (SQLException e) {
-                Logger.getLogger(TAG).log(Level.SEVERE, "Error creating table \"match_id_table\"");
+                Logger.getLogger(TAG).log(Level.SEVERE, "Error creating table \"match_id_table\"", e);
             }
         }
 
@@ -126,7 +125,7 @@ public class MatchID {
                 Statement statement = connection.createStatement();
                 statement.execute(deleteStatement);
             } catch (SQLException e) {
-                Logger.getLogger(TAG).log(Level.SEVERE, "Error deleting table \"match_id_table\"");
+                Logger.getLogger(TAG).log(Level.SEVERE, "Error deleting table \"match_id_table\"", e);
             }
         }
     }

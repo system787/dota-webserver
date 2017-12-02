@@ -1,5 +1,6 @@
 package edu.orangecoastcollege.cs273.model;
 
+import com.google.gson.Gson;
 import edu.orangecoastcollege.cs273.controller.SQLController;
 
 import java.sql.*;
@@ -73,6 +74,11 @@ public class Hero {
                 '}';
     }
 
+    public String toJson() {
+        Gson gson = new Gson();
+        return gson.toJson(this);
+    }
+
     /* Database Methods */
     private static final String TAG = "Hero";
 
@@ -138,7 +144,7 @@ public class Hero {
                 Statement statement = connection.createStatement();
                 statement.execute(createStatement);
             } catch (SQLException e) {
-                Logger.getLogger("Hero.Model").log(Level.SEVERE, "Error creating table \"heroes\"");
+                Logger.getLogger("Hero.Model").log(Level.SEVERE, "Error creating table \"heroes\"", e);
             }
         }
 
@@ -149,7 +155,7 @@ public class Hero {
                 Statement statement = connection.createStatement();
                 statement.execute(deleteStatement);
             } catch (SQLException e) {
-                Logger.getLogger("Hero.Model").log(Level.SEVERE, "Error deleting table \"heroes\"");
+                Logger.getLogger("Hero.Model").log(Level.SEVERE, "Error deleting table \"heroes\"", e);
             }
         }
     }

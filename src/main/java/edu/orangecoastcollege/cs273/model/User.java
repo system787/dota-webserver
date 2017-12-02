@@ -225,7 +225,7 @@ public class User {
                 Statement statement = connection.createStatement();
                 statement.execute(createStatement);
             } catch (SQLException e) {
-                Logger.getLogger("User.Model").log(Level.SEVERE, "Error creating table \"users\"");
+                Logger.getLogger("User.Model").log(Level.SEVERE, "Error creating table \"users\"", e);
             }
         }
 
@@ -236,7 +236,7 @@ public class User {
                 Statement statement = connection.createStatement();
                 statement.execute(deleteStatement);
             } catch (SQLException e) {
-                Logger.getLogger("User.Model").log(Level.SEVERE, "Error deleting table \"users\"");
+                Logger.getLogger("User.Model").log(Level.SEVERE, "Error deleting table \"users\"", e);
             }
         }
     }

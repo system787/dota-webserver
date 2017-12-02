@@ -17,17 +17,19 @@ public class QueryExecutor {
     private static ScheduledExecutorService mUserService;
     private static ScheduledExecutorService mMatchService;
     private static ScheduledExecutorService mMatchDetailService;
+    private static APIRequest mAPIRequest;
 
     private static final String TAG = "QueryExecutor";
 
     private Controller mController = Controller.getInstance();
 
-    public QueryExecutor() {
+    public QueryExecutor(APIRequest apiRequest) {
+        mAPIRequest = apiRequest;
     }
 
-    public static QueryExecutor getInstance() {
+    public static QueryExecutor getInstance(APIRequest apiRequest) {
         if (mInstance == null) {
-            mInstance = new QueryExecutor();
+            mInstance = new QueryExecutor(apiRequest);
         }
 
         mUserService = Executors.newSingleThreadScheduledExecutor();
@@ -120,7 +122,7 @@ public class QueryExecutor {
             if (userId == 0) {
                 return null;
             }
-            return mController.getMatches(userId, numMatches);
+            return mAPIRequest.getMatches(userId, numMatches);
         }
     }
 
@@ -136,7 +138,7 @@ public class QueryExecutor {
             if (userVanityName == null) {
                 return null;
             }
-            return mController.get32FromVanity(userVanityName);
+            return mAPIRequest.get32FromVanity(userVanityName);
         }
     }
 
@@ -152,7 +154,7 @@ public class QueryExecutor {
             if (steamId64Array == null) {
                 return null;
             }
-            return mController.getUserSummaries(steamId64Array);
+            return mAPIRequest.getUserSummaries(steamId64Array);
         }
     }
 

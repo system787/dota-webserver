@@ -128,7 +128,7 @@ public class MatchDetailPlayerUnit {
                 Statement statement = connection.createStatement();
                 statement.execute(createStatement);
             } catch (SQLException e) {
-                Logger.getLogger(TAG).log(Level.SEVERE, "Error creating table \"player_unit\"");
+                Logger.getLogger(TAG).log(Level.SEVERE, "Error creating table \"player_unit\"", e);
             }
         }
 
@@ -140,7 +140,7 @@ public class MatchDetailPlayerUnit {
                 Statement statement = connection.createStatement();
                 statement.execute(deleteStatement);
             } catch (SQLException e) {
-                Logger.getLogger(TAG).log(Level.SEVERE, "Error deleting table \"player_unit\"");
+                Logger.getLogger(TAG).log(Level.SEVERE, "Error deleting table \"player_unit\"", e);
             }
         }
     }

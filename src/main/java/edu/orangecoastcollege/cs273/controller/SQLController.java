@@ -32,7 +32,8 @@ public final class SQLController {
     private final LocalDataBaseModel[] models = new LocalDataBaseModel[]{
             // add local database models here
             // format { new Object.Model(), new Object2.Model() };
-            new Hero.Model(), new MatchID.Model(), new User.Model()
+            new Hero.Model(), new MatchID.Model(), new User.Model(),
+            new MatchDetails.Model(), new MatchDetailPlayer.Model(), new MatchDetailPlayerUnit.Model()
     };
 
     public synchronized static SQLController getInstance() {
@@ -63,7 +64,7 @@ public final class SQLController {
         }
     }
 
-    public synchronized void resetAllTables() {
+    public synchronized boolean resetAllTables() {
         try {
             if (mConnection.isClosed()) {
                 instance.openConnection();
@@ -74,9 +75,13 @@ public final class SQLController {
             }
             createDB(connection);
             instance.close();
+
+            return true;
         } catch (SQLException e) {
             Logger.getLogger(TAG).log(Level.SEVERE, "Error deleting all tables from local database models");
         }
+
+        return false;
     }
 
     public synchronized Connection database() {
