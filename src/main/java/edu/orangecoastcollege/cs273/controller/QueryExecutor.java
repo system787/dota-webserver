@@ -1,6 +1,7 @@
 package edu.orangecoastcollege.cs273.controller;
 
 import edu.orangecoastcollege.cs273.api.APIRequest;
+import edu.orangecoastcollege.cs273.model.Hero;
 import edu.orangecoastcollege.cs273.model.MatchDetails;
 import edu.orangecoastcollege.cs273.model.MatchID;
 import edu.orangecoastcollege.cs273.model.User;
@@ -21,17 +22,13 @@ public class QueryExecutor {
 
     private static final String TAG = "QueryExecutor";
 
-    private Controller mController = Controller.getInstance();
-
-    public QueryExecutor(APIRequest apiRequest) {
-        mAPIRequest = apiRequest;
-    }
+    public QueryExecutor() {}
 
     public static QueryExecutor getInstance(APIRequest apiRequest) {
         if (mInstance == null) {
-            mInstance = new QueryExecutor(apiRequest);
+            mInstance = new QueryExecutor();
         }
-
+        mAPIRequest = apiRequest;
         mUserService = Executors.newSingleThreadScheduledExecutor();
         mMatchService = Executors.newSingleThreadScheduledExecutor();
         mMatchDetailService = Executors.newSingleThreadScheduledExecutor();
@@ -83,6 +80,21 @@ public class QueryExecutor {
             Logger.getLogger(TAG).log(Level.SEVERE, "InterruptedException occurred in scheduleQueryUserSummaries", e);
         } catch (ExecutionException e) {
             Logger.getLogger(TAG).log(Level.SEVERE, "ExecutionException occurred in scheduleQueryUserSummaries", e);
+        }
+        return null;
+    }
+
+    public List<Hero> scheduleQueryHeroesList() {
+        QueryHeroesList query = new QueryHeroesList();
+        ScheduledFuture<List<Hero>> scheduledFuture = mMatchService.schedule(query, 1050, TimeUnit.MILLISECONDS);
+
+        try {
+            List<Hero> heroList = scheduledFuture.get();
+            return heroList;
+        } catch (InterruptedException e) {
+            Logger.getLogger(TAG).log(Level.SEVERE, "InterruptedException occurred in scheduleQueryHeroesList", e);
+        } catch (ExecutionException e) {
+            Logger.getLogger(TAG).log(Level.SEVERE, "ExecutionException occurred in scheduleQueryHeroesList", e);
         }
         return null;
     }
@@ -158,4 +170,10 @@ public class QueryExecutor {
         }
     }
 
+    private class QueryHeroesList implements Callable<List<Hero>> {
+        @Override
+        public List<Hero> call() throws Exception {
+            return mAPIRequest.getAllHeroes();
+        }
+    }
 }

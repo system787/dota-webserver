@@ -193,6 +193,39 @@ public class User {
         return null;
     }
 
+    public static List<User> getUsersByID(SQLController dbc, long[] steamId64) {
+        String selectStatement = "SELECT * FROM users WHERE (steam_id = ";
+        List<User> userList = new ArrayList<>();
+
+        try {
+            Connection connection = dbc.database();
+            Statement statement = connection.createStatement();
+            ResultSet rs;
+
+            for (int i = 0; i < steamId64.length; i++) {
+                String tempSelect = selectStatement + steamId64[i] + ")";
+                rs = statement.executeQuery(tempSelect);
+
+                while (rs.next()) {
+                    userList.add(new User(
+                            rs.getLong("steam_id"),
+                            rs.getInt("privacy"),
+                            rs.getInt("profile_state"),
+                            rs.getString("persona_name"),
+                            rs.getLong("last_log_off"),
+                            rs.getString("profile_url"),
+                            rs.getString("avatar_url")
+                    ));
+                }
+            }
+
+            return userList;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public static List<User> getAllUsers(SQLController dbc) {
         String selectStatement = "SELECT * FROM users";
 

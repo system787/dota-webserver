@@ -37,7 +37,6 @@ public class APIRequest {
     public String getJSON(String url, int timeout) throws JSONException {
         HttpURLConnection c = null;
         try {
-            Logger.getLogger(TAG).log(Level.INFO, "Building new HTTP connection");
             URL u = new URL(url);
             c = (HttpURLConnection) u.openConnection();
             c.setRequestMethod("GET");
@@ -46,10 +45,12 @@ public class APIRequest {
             c.setAllowUserInteraction(false);
             c.setConnectTimeout(timeout);
             c.setReadTimeout(timeout);
-            Logger.getLogger(TAG).log(Level.INFO, "Attempting to connect to URL");
             c.connect();
             int status = c.getResponseCode();
-            Logger.getLogger(TAG).log(Level.INFO, "Response code received: " + status);
+
+            if (status < 200 || status > 201) {
+                Logger.getLogger(TAG).log(Level.INFO, "Response code received: " + status);
+            }
 
             switch (status) {
                 case 200:
@@ -63,7 +64,6 @@ public class APIRequest {
                     br.close();
                     return sb.toString();
                 default:
-                    Logger.getLogger(TAG).log(Level.SEVERE, "Error; Response code: " + status);
                     return null;
             }
         } catch (MalformedURLException e) {
@@ -162,13 +162,18 @@ public class APIRequest {
         try {
             String json = getJSON(url.toString(), REQUEST_TIMEOUT);
             JSONObject response = new JSONObject(json).getJSONObject("response");
-
             if (response == null) {
                 return null;
             }
 
             JSONArray jsonArray = response.getJSONArray("players");
             List<User> userList = new ArrayList<>();
+
+            if (jsonArray.length() == 0) {
+                User anonymous_user = new User(0, 1, 0, "Anonymous User", 0, "", "");
+                userList.add(anonymous_user);
+                return userList;
+            }
 
             for (Object o : jsonArray) {
                 JSONObject jsonLineItem = (JSONObject) o;

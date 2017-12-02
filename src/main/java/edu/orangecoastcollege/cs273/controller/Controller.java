@@ -2,10 +2,9 @@ package edu.orangecoastcollege.cs273.controller;
 
 import edu.orangecoastcollege.cs273.api.APIRequest;
 import edu.orangecoastcollege.cs273.model.*;
+
 import java.sql.SQLException;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -18,8 +17,10 @@ public class Controller {
     private static final int MAX_USER_CAPACITY = 5000;
     private static final int MAX_MATCH_ID_CAPACITY = 50000;
 
-    private static HashSet mMatchIdHash;
-    private static HashSet mUserIdHash;
+    public static final long STEAM_ID_64_DIFFERENCE = 76561197960265728L;
+
+    private static HashSet<Long> mMatchIdHash;
+    private static HashSet<Long> mUserIdHash;
     private static APIRequest mApiRequest;
 
 
@@ -49,10 +50,10 @@ public class Controller {
 
     // restrict access after testing everything else
     public void resetAllTables() {
-            boolean success = mSQLController.resetAllTables();
-            if (!success) {
-                Logger.getLogger(TAG).log(Level.SEVERE, "resetAllTables() was called but an error has occurred");
-            }
+        boolean success = mSQLController.resetAllTables();
+        if (!success) {
+            Logger.getLogger(TAG).log(Level.SEVERE, "resetAllTables() was called but an error has occurred");
+        }
     }
 
 
@@ -78,10 +79,27 @@ public class Controller {
         return null;
     }
 
-    public void updateHeroesList() {
+    public List<Hero> updateHeroesList() {
         List<Hero> heroListDB = getHeroesList();
+        heroListDB.sort((o1, o2) -> o1.getId() - o2.getId());
 
-        // TODO: low priority - create method to get new list of heroes and compare, then replace if updated
+        List<Hero> heroListServer = mQueryExecutor.scheduleQueryHeroesList();
+        heroListServer.sort((o1, o2) -> o1.getId() - o2.getId());
+
+        if (!heroListDB.equals(heroListServer)) {
+            try {
+                mSQLController.openConnection();
+                Hero.deleteTable(mSQLController);
+                for (Hero h : heroListServer) {
+                    h.saveToDB(mSQLController);
+                }
+                mSQLController.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return heroListServer;
     }
 
     public void saveUsersToDB(List<User> userList) {
@@ -97,8 +115,8 @@ public class Controller {
     }
 
     private static void loadSteamIds() {
-        mMatchIdHash = new HashSet();
-        mUserIdHash = new HashSet();
+        mMatchIdHash = new HashSet<Long>();
+        mUserIdHash = new HashSet<Long>();
         try {
             mSQLController.openConnection();
             List<Long> matchIdList = MatchID.getAllMatchID(mSQLController);
@@ -107,6 +125,9 @@ public class Controller {
 
             mMatchIdHash.addAll(matchIdList);
             mUserIdHash.addAll(userIdList);
+
+            // mMatchIdHash.addAll(matchIdList);
+            // mUserIdHash.addAll(userIdList);
 
             Logger.getLogger(TAG).log(Level.INFO, "Steam IDs and Match IDs were successfully loaded");
         } catch (SQLException e) {
@@ -120,10 +141,18 @@ public class Controller {
         return mUserIdHash.contains(steamId);
     }
 
-    public boolean signUpNewUser(long steamId) {
-        if (!checkUserRegistration(steamId)) {
-            List<User> userList = mQueryExecutor.scheduleQueryUserSummaries(new long[]{steamId});
+    public boolean signUpNewUser(long steamId64) {
+        if (steamId64 < STEAM_ID_64_DIFFERENCE) {
+            steamId64 += STEAM_ID_64_DIFFERENCE;
+        }
+
+        if (!checkUserRegistration(steamId64)) {
+            List<User> userList = mQueryExecutor.scheduleQueryUserSummaries(new long[]{steamId64});
             saveUsersToDB(userList);
+
+            if (userList.size() == 0) {
+                return false;
+            }
 
             long userId = userList.get(0).getSteamId32();
             mUserIdHash.add(userId);
@@ -133,4 +162,34 @@ public class Controller {
 
         return false;
     }
+
+    public List<User> getAllUsers() {
+        try {
+            mSQLController.openConnection();
+            List<User> userList = User.getAllUsers(mSQLController);
+            mSQLController.close();
+            return userList;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public List<User> getUserSummaries(long[] steamId64) {
+        try {
+            mSQLController.openConnection();
+            for (long l : steamId64) {
+                if (l < STEAM_ID_64_DIFFERENCE) {
+                    l += STEAM_ID_64_DIFFERENCE;
+                }
+            }
+            List<User> userList = User.getUsersByID(mSQLController, steamId64);
+            mSQLController.close();
+            return userList;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 }
