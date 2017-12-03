@@ -2,6 +2,8 @@ package edu.orangecoastcollege.cs273.dotaweb;
 
 import edu.orangecoastcollege.cs273.api.APIRequest;
 import edu.orangecoastcollege.cs273.controller.Controller;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,6 +25,24 @@ public class DotaWebController {
         long steamId = Long.parseLong(steamId64);
 
         return mController.toGson(mController.getUserSummaries(new long[]{steamId}));
+    }
+
+    @RequestMapping(value = "/dotaweb/register", method = RequestMethod.POST)
+    public ResponseEntity signUpNewUser(@RequestParam("steamId64") String steamId64) {
+        long steamId = Long.parseLong(steamId64);
+
+        boolean signUpSuccess = mController.signUpNewUser(steamId);
+
+        if (signUpSuccess) {
+            return new ResponseEntity(HttpStatus.ACCEPTED);
+        }
+
+        return new ResponseEntity(HttpStatus.BAD_REQUEST);
+    }
+
+    @RequestMapping(value = "/dotaweb/fetch/refresh", method = RequestMethod.GET)
+    public String getLatest25Matches(@RequestParam("steamId32") String steamId32) {
+        return null;
     }
 
 }

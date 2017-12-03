@@ -276,6 +276,7 @@ public class APIRequest {
                 long matchSeqNum = response.getLong("match_seq_num");
 
                 boolean radiantWin = response.getBoolean("radiant_win");
+                long startTime = response.getLong("start_time");
                 int duration = response.getInt("duration");
                 int firstBloodTime = response.getInt("first_blood_time");
                 int lobbyType = response.getInt("lobby_type");
@@ -283,7 +284,7 @@ public class APIRequest {
                 int gameMode = response.getInt("game_mode");
 
                 MatchDetails match = new MatchDetails(matchId, matchSeqNum, playerList,
-                        radiantWin, duration, firstBloodTime,
+                        radiantWin, startTime, duration, firstBloodTime,
                         lobbyType, numPlayers, gameMode);
 
                 matchDetailsList.add(match);
@@ -307,6 +308,7 @@ public class APIRequest {
 
             long playerId = playerJSON.getLong("account_id");
             int heroId = playerJSON.getInt("hero_id");
+            int playerSlot = playerJSON.getInt("player_slot");
             int[] itemArray = new int[]{playerJSON.getInt("item_0"), playerJSON.getInt("item_1"),
                     playerJSON.getInt("item_2"), playerJSON.getInt("item_3"),
                     playerJSON.getInt("item_4"), playerJSON.getInt("item_5")};
@@ -326,7 +328,7 @@ public class APIRequest {
             int level = playerJSON.getInt("level");
 
 
-            MatchDetailPlayer player = new MatchDetailPlayer(matchId, playerId, heroId, itemArray,
+            MatchDetailPlayer player = new MatchDetailPlayer(matchId, playerId, playerSlot, heroId, itemArray,
                     kills, deaths, assists, leaverStatus,
                     gold, lastHits, denies, gpm, xpm,
                     goldSpent, heroDamage, towerDamage, heroHealing,

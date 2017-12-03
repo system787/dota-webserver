@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 public class MatchDetailPlayer {
     private long mMatchId;
     private long mAccountId;
+    private int mPlayerSlot;
     private int mHeroId;
     private int[] mItems;
     private int mKills;
@@ -36,7 +37,7 @@ public class MatchDetailPlayer {
     private MatchDetailPlayerUnit mMatchDetailPlayerUnit;
 
     public MatchDetailPlayer(
-            long matchId, long accountId, int heroId, int[] items,
+            long matchId, long accountId, int playerSlot, int heroId, int[] items,
             int kills, int deaths, int assists,
             int leaverStatus, int gold, int lastHits,
             int denies, int GPM, int XPM, int goldSpent,
@@ -44,6 +45,7 @@ public class MatchDetailPlayer {
             int level, MatchDetailPlayerUnit matchDetailPlayerUnit) {
         mMatchId = matchId;
         mAccountId = accountId;
+        mPlayerSlot = playerSlot;
         mHeroId = heroId;
         mItems = items;
         mKills = kills;
@@ -63,29 +65,30 @@ public class MatchDetailPlayer {
         mMatchDetailPlayerUnit = matchDetailPlayerUnit;
     }
 
-    public MatchDetailPlayer(long mMatchId, long mAccountId, int mHeroId, int[] mItems,
-                             int mKills, int mDeaths, int mAssists, int mLeaverStatus,
-                             int mGold, int mLastHits, int mDenies, int mGPM, int mXPM,
-                             int mGoldSpent, int mHeroDamage, int mTowerDamage, int mHeroHealing,
-                             int mLevel) {
-        this.mMatchId = mMatchId;
-        this.mAccountId = mAccountId;
-        this.mHeroId = mHeroId;
-        this.mItems = mItems;
-        this.mKills = mKills;
-        this.mDeaths = mDeaths;
-        this.mAssists = mAssists;
-        this.mLeaverStatus = mLeaverStatus;
-        this.mGold = mGold;
-        this.mLastHits = mLastHits;
-        this.mDenies = mDenies;
-        this.mGPM = mGPM;
-        this.mXPM = mXPM;
-        this.mGoldSpent = mGoldSpent;
-        this.mHeroDamage = mHeroDamage;
-        this.mTowerDamage = mTowerDamage;
-        this.mHeroHealing = mHeroHealing;
-        this.mLevel = mLevel;
+    public MatchDetailPlayer(long matchId, long accountId, int playerSlot, int heroId, int[] items,
+                             int kills, int deaths, int assists, int leaverStatus,
+                             int gold, int lastHits, int denies, int gpm, int xpm,
+                             int goldSpent, int heroDamage, int towerDamage, int heroHealing,
+                             int level) {
+        mMatchId = matchId;
+        mAccountId = accountId;
+        mPlayerSlot = playerSlot;
+        mHeroId = heroId;
+        mItems = items;
+        mKills = kills;
+        mDeaths = deaths;
+        mAssists = assists;
+        mLeaverStatus = leaverStatus;
+        mGold = gold;
+        mLastHits = lastHits;
+        mDenies = denies;
+        mGPM = gpm;
+        mXPM = xpm;
+        mGoldSpent = goldSpent;
+        mHeroDamage = heroDamage;
+        mTowerDamage = towerDamage;
+        mHeroHealing = heroHealing;
+        mLevel = level;
     }
 
     public long getMatchId() {
@@ -102,6 +105,14 @@ public class MatchDetailPlayer {
 
     public void setAccountId(long accountId) {
         mAccountId = accountId;
+    }
+
+    public int getPlayerSlot() {
+        return mPlayerSlot;
+    }
+
+    public void setPlayerSlot(int playerSlot) {
+        this.mPlayerSlot = playerSlot;
     }
 
     public int getHeroId() {
@@ -247,36 +258,37 @@ public class MatchDetailPlayer {
     private static final String TAG = "MatchDetailPlayer";
 
     public void saveToDB(SQLController dbc) {
-        String insertStatement = "INSERT INTO match_detail_player (match_id, account_id, hero_id, level, " +
+        String insertStatement = "INSERT INTO match_detail_player (match_id, account_id, player_slot, hero_id, level, " +
                 "kills, deaths, assists, leaver_status, " +
                 "gold, last_hits, denies, gpm, " +
                 "xpm, gold_spent, hero_damage, tower_damage, " +
                 "hero_healing, slot_zero, slot_one, slot_two, " +
-                "slot_three, slot_four, slot_five) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                "slot_three, slot_four, slot_five) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
         try {
             Connection connection = dbc.database();
             PreparedStatement preparedStatement = connection.prepareStatement(insertStatement);
             preparedStatement.setLong(1, mMatchId);
             preparedStatement.setLong(2, mAccountId);
-            preparedStatement.setInt(3, mHeroId);
-            preparedStatement.setInt(4, mLevel);
-            preparedStatement.setInt(5, mKills);
-            preparedStatement.setInt(6, mDeaths);
-            preparedStatement.setInt(7, mAssists);
-            preparedStatement.setInt(8, mLeaverStatus);
-            preparedStatement.setInt(9, mGold);
-            preparedStatement.setInt(10, mLastHits);
-            preparedStatement.setInt(11, mDenies);
-            preparedStatement.setInt(12, mGPM);
-            preparedStatement.setInt(13, mXPM);
-            preparedStatement.setInt(14, mGoldSpent);
-            preparedStatement.setInt(15, mHeroDamage);
-            preparedStatement.setInt(16, mTowerDamage);
-            preparedStatement.setInt(17, mHeroHealing);
+            preparedStatement.setInt(3, mPlayerSlot);
+            preparedStatement.setInt(4, mHeroId);
+            preparedStatement.setInt(5, mLevel);
+            preparedStatement.setInt(6, mKills);
+            preparedStatement.setInt(7, mDeaths);
+            preparedStatement.setInt(8, mAssists);
+            preparedStatement.setInt(9, mLeaverStatus);
+            preparedStatement.setInt(10, mGold);
+            preparedStatement.setInt(11, mLastHits);
+            preparedStatement.setInt(12, mDenies);
+            preparedStatement.setInt(13, mGPM);
+            preparedStatement.setInt(14, mXPM);
+            preparedStatement.setInt(15, mGoldSpent);
+            preparedStatement.setInt(16, mHeroDamage);
+            preparedStatement.setInt(17, mTowerDamage);
+            preparedStatement.setInt(18, mHeroHealing);
 
             for (int i = 0; i < mItems.length; i++) {
-                preparedStatement.setInt(18 + i, mItems[i]);
+                preparedStatement.setInt(19 + i, mItems[i]);
             }
 
             preparedStatement.executeUpdate();
@@ -304,7 +316,7 @@ public class MatchDetailPlayer {
             itemArray[5] = resultSet.getInt("slot_five");
 
             MatchDetailPlayer player = new MatchDetailPlayer(
-                    resultSet.getLong("match_id"), resultSet.getLong("steam_id"), resultSet.getInt("hero_id"), itemArray,
+                    resultSet.getLong("match_id"), resultSet.getLong("steam_id"), resultSet.getInt("hero_id"), resultSet.getInt("player_slot"), itemArray,
                     resultSet.getInt("kills"), resultSet.getInt("deaths"), resultSet.getInt("assists"), resultSet.getInt("leaver_status"),
                     resultSet.getInt("gold"), resultSet.getInt("last_hits"), resultSet.getInt("denies"), resultSet.getInt("gpm"),
                     resultSet.getInt("xpm"), resultSet.getInt("gold_spent"), resultSet.getInt("hero_damage"), resultSet.getInt("tower_damage"),
@@ -341,6 +353,7 @@ public class MatchDetailPlayer {
 
                 MatchDetailPlayer player = new MatchDetailPlayer(resultSet.getLong("match_id"),
                         resultSet.getLong("steam_id"),
+                        resultSet.getInt("player_slot"),
                         resultSet.getInt("hero_id"),
                         itemArray,
                         resultSet.getInt("kills"),
@@ -390,6 +403,7 @@ public class MatchDetailPlayer {
             String createStatement = "CREATE TABLE IF NOT EXISTS player_list("
                     + "match_id BIGINT NOT NULL, "
                     + "account_id BIGINT NOT NULL, "
+                    + "player_slot INT NOT NULL, "
                     + "hero_id INT NOT NULL, "
                     + "level INT NOT NULL, "
                     + "kills INT NOT NULL, "

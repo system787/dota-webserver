@@ -13,6 +13,7 @@ public class MatchDetails {
     private long mMatchSeqNum;
     private List<MatchDetailPlayer> mMatchDetailPlayerList;
     private boolean mRadiantWin;
+    private long mStartTime;
     private int mDuration;
     private int mFirstBloodTime;
     private int mLobbyType;
@@ -40,18 +41,17 @@ public class MatchDetails {
                                 // 22 - Ranked Matchmaking
 
 
-    public MatchDetails(long matchID, long matchSeqNum, List<MatchDetailPlayer> matchDetailPlayerList,
-                        boolean radiantWin, int duration, int firstBloodTime,
-                        int lobbyType, int numPlayers, int gameMode) {
-        mMatchID = matchID;
-        mMatchSeqNum = matchSeqNum;
-        mMatchDetailPlayerList = matchDetailPlayerList;
-        mRadiantWin = radiantWin;
-        mDuration = duration;
-        mFirstBloodTime = firstBloodTime;
-        mLobbyType = lobbyType;
-        mNumPlayers = numPlayers;
-        mGameMode = gameMode;
+    public MatchDetails(long mMatchID, long mMatchSeqNum, List<MatchDetailPlayer> mMatchDetailPlayerList, boolean mRadiantWin, long mStartTime, int mDuration, int mFirstBloodTime, int mLobbyType, int mNumPlayers, int mGameMode) {
+        this.mMatchID = mMatchID;
+        this.mMatchSeqNum = mMatchSeqNum;
+        this.mMatchDetailPlayerList = mMatchDetailPlayerList;
+        this.mRadiantWin = mRadiantWin;
+        this.mStartTime = mStartTime;
+        this.mDuration = mDuration;
+        this.mFirstBloodTime = mFirstBloodTime;
+        this.mLobbyType = mLobbyType;
+        this.mNumPlayers = mNumPlayers;
+        this.mGameMode = mGameMode;
     }
 
     public long getMatchID() {
@@ -84,6 +84,14 @@ public class MatchDetails {
 
     public void setRadiantWin(boolean radiantWin) {
         mRadiantWin = radiantWin;
+    }
+
+    public long getmStartTime() {
+        return mStartTime;
+    }
+
+    public void setmStartTime(long mStartTime) {
+        this.mStartTime = mStartTime;
     }
 
     public int getDuration() {
@@ -129,19 +137,20 @@ public class MatchDetails {
     private static final String TAG = "MatchDetails";
 
     public void saveToDB(SQLController dbc) {
-        String insertStatement = "INSERT INTO match_details (match_id, match_seq_num, duration, first_blood, lobby_type, num_players, game_mode, radiant_win) VALUES (?,?,?,?,?,?,?,?)";
+        String insertStatement = "INSERT INTO match_details (match_id, match_seq_num, start_time, duration, first_blood, lobby_type, num_players, game_mode, radiant_win) VALUES (?,?,?,?,?,?,?,?,?)";
 
         try {
             Connection connection = dbc.database();
             PreparedStatement preparedStatement = connection.prepareStatement(insertStatement);
             preparedStatement.setLong(1, mMatchID);
             preparedStatement.setLong(2, mMatchSeqNum);
-            preparedStatement.setInt(3, mDuration);
-            preparedStatement.setInt(4, mFirstBloodTime);
-            preparedStatement.setInt(5, mLobbyType);
-            preparedStatement.setInt(6, mNumPlayers);
-            preparedStatement.setInt(7, mGameMode);
-            preparedStatement.setInt(8, mRadiantWin ? 1 : 0);
+            preparedStatement.setLong(3, mStartTime);
+            preparedStatement.setInt(4, mDuration);
+            preparedStatement.setInt(5, mFirstBloodTime);
+            preparedStatement.setInt(6, mLobbyType);
+            preparedStatement.setInt(7, mNumPlayers);
+            preparedStatement.setInt(8, mGameMode);
+            preparedStatement.setInt(9, mRadiantWin ? 1 : 0);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             Logger.getLogger(TAG).log(Level.SEVERE, "Error inserting into table \"match_details\"", e);
@@ -149,7 +158,7 @@ public class MatchDetails {
     }
 
     public static List<MatchDetails> getAllMatchDetailsList(SQLController dbc) {
-        String selectStatement = "SELECT match_id, match_seq_num, duration, first_blood, lobby_type, num_players, game_mode, radiant_win FROM match_details";
+        String selectStatement = "SELECT match_id, match_seq_num, start_time, duration, first_blood, lobby_type, num_players, game_mode, radiant_win FROM match_details";
         try {
             Connection connection = dbc.database();
             Statement statement = connection.createStatement();
@@ -162,7 +171,8 @@ public class MatchDetails {
                 List<MatchDetailPlayer> matchDetailPlayerList = MatchDetailPlayer.getPlayerDetailsList(dbc, matchId);
                 MatchDetails matchDetails = new MatchDetails(
                         matchId, resultSet.getLong("match_seq_num"), matchDetailPlayerList,
-                        resultSet.getBoolean("radiant_win"), resultSet.getInt("duration"), resultSet.getInt("first_blood"),
+                        resultSet.getBoolean("radiant_win"),
+                        resultSet.getLong("start_time"), resultSet.getInt("duration"), resultSet.getInt("first_blood"),
                         resultSet.getInt("lobby_type"), resultSet.getInt("num_players"), resultSet.getInt("game_mode")
                 );
                 matchDetailsList.add(matchDetails);
@@ -187,6 +197,7 @@ public class MatchDetails {
                     "match_id BIGINT PRIMARY KEY NOT NULL, " +
                     "match_seq_num BIGINT NOT NULL, " +
                     "radiant_win INT NOT NULL, " +
+                    "start_time BIG INT NOT NULL, " +
                     "duration INT NOT NULL, " +
                     "first_blood INT NOT NULL, " +
                     "lobby_type INT NOT NULL, " +

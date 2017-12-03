@@ -200,4 +200,26 @@ public class Controller {
         return output;
     }
 
+    public List<MatchDetails> getLatestMatchesSingleUser(long steamId32) {
+        if (steamId32 > STEAM_ID_64_DIFFERENCE) {
+            steamId32 -= STEAM_ID_64_DIFFERENCE;
+        }
+
+        List<MatchID> matchIDList = mQueryExecutor.scheduleQueryMatchTask(steamId32);
+
+        List<MatchID> matchesNotInHash = new ArrayList<>();
+
+        for (MatchID m : matchIDList) {
+            if (!mMatchIdHash.contains(m.getmMatchId())) {
+                matchesNotInHash.add(m);
+            }
+        }
+
+        for (MatchID m : matchesNotInHash) {
+            // TODO: create scheduleQueryMatchDetails first
+        }
+
+        return null;
+    }
+
 }
