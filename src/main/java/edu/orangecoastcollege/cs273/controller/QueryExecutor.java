@@ -99,27 +99,25 @@ public class QueryExecutor {
         return null;
     }
 
+    public List<MatchDetails> scheduleMatchDetailsList(long[] matchId) {
+        QueryMatchDetails query = new QueryMatchDetails();
+        query.setMatchId(matchId);
+        ScheduledFuture<List<MatchDetails>> scheduledFuture = mMatchDetailService.schedule(query, 1050, TimeUnit.MILLISECONDS);
+
+        try {
+            List<MatchDetails> matchDetailsList = scheduledFuture.get();
+            return matchDetailsList;
+        } catch (InterruptedException e) {
+            Logger.getLogger(TAG).log(Level.SEVERE, "InterruptedException occurred in scheduleMatchDetailsList", e);
+        } catch (ExecutionException e) {
+            Logger.getLogger(TAG).log(Level.SEVERE, "ExecutionException occurred in scheduleMatchDetailsList", e);
+        }
+        return null;
+    }
+
     /**
      * Classes for Queries
      */
-
-    private class QueryMatchDetailsTask implements Callable<MatchDetails> {
-        // TODO: finish query match details executor
-
-        private long matchId;
-
-        public void setMatchId(long id) {
-            matchId = id;
-        }
-
-        @Override
-        public MatchDetails call() throws Exception {
-            if (matchId == 0) {
-                return null;
-            }
-            return null;
-        }
-    }
 
     private class QueryMatchTask implements Callable<List<MatchID>> {
         private long userId;
@@ -174,6 +172,22 @@ public class QueryExecutor {
         @Override
         public List<Hero> call() throws Exception {
             return mAPIRequest.getAllHeroes();
+        }
+    }
+
+    private class QueryMatchDetails implements Callable<List<MatchDetails>> {
+        private long[] matchId;
+
+        public void setMatchId(long[] matchId) {
+            this.matchId = matchId;
+        }
+
+        @Override
+        public List<MatchDetails> call() throws Exception {
+            if (matchId == null) {
+                return null;
+            }
+            return mAPIRequest.getMatchDetails(matchId);
         }
     }
 }

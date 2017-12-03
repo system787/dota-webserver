@@ -193,6 +193,20 @@ public class Controller {
         return null;
     }
 
+    public boolean saveMatchDetails(List<MatchDetails> matchDetails) {
+        try {
+            mSQLController.openConnection();
+            for (MatchDetails m : matchDetails) {
+                m.saveToDB(mSQLController);
+            }
+            mSQLController.close();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     public String toGson(Object o) {
         Gson gson = new Gson();
         String output = gson.toJson(o);
@@ -215,11 +229,20 @@ public class Controller {
             }
         }
 
-        for (MatchID m : matchesNotInHash) {
-            // TODO: create scheduleQueryMatchDetails first
+        if (matchesNotInHash.size() == 0) {
+            return null;
         }
 
-        return null;
+        long[] matchID = new long[matchesNotInHash.size()];
+
+        for (int i = 0; i < matchID.length; i++) {
+            matchID[i] = matchesNotInHash.get(i).getmMatchId();
+        }
+
+        List<MatchDetails> matchDetailsList = mQueryExecutor.scheduleMatchDetailsList(matchID);
+        saveMatchDetails(matchDetailsList);
+
+        return matchDetailsList;
     }
 
 }
