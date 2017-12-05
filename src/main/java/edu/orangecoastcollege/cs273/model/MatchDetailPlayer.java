@@ -244,9 +244,9 @@ public class MatchDetailPlayer {
     }
 
     public MatchDetailPlayerUnit getMatchDetailPlayerUnit() {
-        if (mMatchDetailPlayerUnit == null) {
-            Logger.getLogger(TAG).log(Level.SEVERE,"Player " + String.valueOf(mAccountId) + " does not have a unit");
-        }
+        // if (mMatchDetailPlayerUnit == null) {
+        //     Logger.getLogger(TAG).log(Level.SEVERE,"Player " + String.valueOf(mAccountId) + " does not have a unit");
+        // }
 
         return mMatchDetailPlayerUnit;
     }
@@ -258,7 +258,7 @@ public class MatchDetailPlayer {
     private static final String TAG = "MatchDetailPlayer";
 
     public void saveToDB(SQLController dbc) {
-        String insertStatement = "INSERT INTO match_detail_player (match_id, account_id, player_slot, hero_id, level, " +
+        String insertStatement = "INSERT INTO match_detail_player (match_id, account_id, player_slot, hero_id, player_level, " +
                 "kills, deaths, assists, leaver_status, " +
                 "gold, last_hits, denies, gpm, " +
                 "xpm, gold_spent, hero_damage, tower_damage, " +
@@ -320,7 +320,7 @@ public class MatchDetailPlayer {
                     resultSet.getInt("kills"), resultSet.getInt("deaths"), resultSet.getInt("assists"), resultSet.getInt("leaver_status"),
                     resultSet.getInt("gold"), resultSet.getInt("last_hits"), resultSet.getInt("denies"), resultSet.getInt("gpm"),
                     resultSet.getInt("xpm"), resultSet.getInt("gold_spent"), resultSet.getInt("hero_damage"), resultSet.getInt("tower_damage"),
-                    resultSet.getInt("hero_healing"), resultSet.getInt("level"), playerUnit);
+                    resultSet.getInt("hero_healing"), resultSet.getInt("player_level"), playerUnit);
 
             return player;
         } catch (SQLException e) {
@@ -351,7 +351,8 @@ public class MatchDetailPlayer {
                 itemArray[4] = resultSet.getInt("slot_four");
                 itemArray[5] = resultSet.getInt("slot_five");
 
-                MatchDetailPlayer player = new MatchDetailPlayer(resultSet.getLong("match_id"),
+                MatchDetailPlayer player = new MatchDetailPlayer(
+                        resultSet.getLong("match_id"),
                         resultSet.getLong("steam_id"),
                         resultSet.getInt("player_slot"),
                         resultSet.getInt("hero_id"),
@@ -369,7 +370,7 @@ public class MatchDetailPlayer {
                         resultSet.getInt("hero_damage"),
                         resultSet.getInt("tower_damage"),
                         resultSet.getInt("hero_healing"),
-                        resultSet.getInt("level"),
+                        resultSet.getInt("player_level"),
                         playerUnit);
                 playerDetailsList.add(player);
             }
@@ -400,12 +401,12 @@ public class MatchDetailPlayer {
 
         @Override
         public void createTable(Connection connection) {
-            String createStatement = "CREATE TABLE IF NOT EXISTS player_list("
+            String createStatement = "CREATE TABLE IF NOT EXISTS match_detail_player("
                     + "match_id BIGINT NOT NULL, "
                     + "account_id BIGINT NOT NULL, "
                     + "player_slot INT NOT NULL, "
                     + "hero_id INT NOT NULL, "
-                    + "level INT NOT NULL, "
+                    + "player_level INT NOT NULL, "
                     + "kills INT NOT NULL, "
                     + "deaths INT NOT NULL, "
                     + "assists INT NOT NULL, "

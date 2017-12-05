@@ -153,8 +153,25 @@ public class MatchDetails {
             preparedStatement.setInt(9, mRadiantWin ? 1 : 0);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            Logger.getLogger(TAG).log(Level.SEVERE, "Error inserting into table \"match_details\"", e);
+            Logger.getLogger(TAG).log(Level.SEVERE, "Error inserting into table \"match_details\"");
         }
+    }
+
+    private static List<MatchDetails> parseResultSet(SQLController dbc, ResultSet resultSet) throws SQLException {
+        List<MatchDetails> matchDetailsList = new ArrayList<>();
+        while (resultSet.next()) {
+            long matchId = resultSet.getLong("match_id");
+            List<MatchDetailPlayer> matchDetailPlayerList = MatchDetailPlayer.getPlayerDetailsList(dbc, matchId);
+            MatchDetails matchDetails = new MatchDetails(
+                    matchId, resultSet.getLong("match_seq_num"), matchDetailPlayerList,
+                    resultSet.getBoolean("radiant_win"),
+                    resultSet.getLong("start_time"), resultSet.getInt("duration"), resultSet.getInt("first_blood"),
+                    resultSet.getInt("lobby_type"), resultSet.getInt("num_players"), resultSet.getInt("game_mode")
+            );
+            matchDetailsList.add(matchDetails);
+        }
+
+        return matchDetailsList;
     }
 
     public static List<MatchDetails> getAllMatchDetailsList(SQLController dbc) {
@@ -165,22 +182,31 @@ public class MatchDetails {
             ResultSet resultSet = statement.executeQuery(selectStatement);
 
             List<MatchDetails> matchDetailsList = new ArrayList<>();
+            matchDetailsList.addAll(parseResultSet(dbc, resultSet));
 
-            while (resultSet.next()) {
-                long matchId = resultSet.getLong("match_id");
-                List<MatchDetailPlayer> matchDetailPlayerList = MatchDetailPlayer.getPlayerDetailsList(dbc, matchId);
-                MatchDetails matchDetails = new MatchDetails(
-                        matchId, resultSet.getLong("match_seq_num"), matchDetailPlayerList,
-                        resultSet.getBoolean("radiant_win"),
-                        resultSet.getLong("start_time"), resultSet.getInt("duration"), resultSet.getInt("first_blood"),
-                        resultSet.getInt("lobby_type"), resultSet.getInt("num_players"), resultSet.getInt("game_mode")
-                );
-                matchDetailsList.add(matchDetails);
-            }
             return matchDetailsList;
         } catch (SQLException e) {
             Logger.getLogger(TAG).log(Level.SEVERE, "Error retrieving all entries from table \"match_details\"");
         }
+        return null;
+    }
+
+    public static List<MatchDetails> getMatchDetails(SQLController dbc, List<Long> matchIdList) {
+        String selectStatement = "SELECT * FROM match_details WHERE (match_id = ";
+        List<MatchDetails> matchDetailsList = new ArrayList<>();
+
+            try {
+                Connection connection = dbc.database();
+                for (long l : matchIdList) {
+                    String query = selectStatement + String.valueOf(l) + ")";
+                    Statement statement = connection.createStatement();
+                    ResultSet resultSet = statement.executeQuery(query);
+                    matchDetailsList.addAll(parseResultSet(dbc, resultSet));
+                }
+                return matchDetailsList;
+            } catch (SQLException e) {
+                Logger.getLogger(TAG).log(Level.SEVERE, "Error retrieving entries from table \"match_details\"");
+            }
         return null;
     }
 

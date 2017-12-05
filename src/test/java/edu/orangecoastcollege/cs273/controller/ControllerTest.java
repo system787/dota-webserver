@@ -17,8 +17,7 @@ public class ControllerTest {
     @BeforeClass
     public static void beforeClass() throws Exception {
         mController = Controller.getInstance();
-        mController.resetAllTables();
-
+        //mController.resetAllTables();
     }
 
     @Before

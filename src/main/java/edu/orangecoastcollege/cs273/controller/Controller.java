@@ -15,9 +15,6 @@ public class Controller {
     private static SQLController mSQLController;
     private static QueryExecutor mQueryExecutor;
 
-    private static final int MAX_USER_CAPACITY = 5000;
-    private static final int MAX_MATCH_ID_CAPACITY = 50000;
-
     public static final long STEAM_ID_64_DIFFERENCE = 76561197960265728L;
 
     private static HashSet<Long> mMatchIdHash;
@@ -41,8 +38,6 @@ public class Controller {
         if (mQueryExecutor == null) {
             mQueryExecutor = QueryExecutor.getInstance(mApiRequest);
         }
-
-        loadSteamIds();
 
 
         return mController;
@@ -115,53 +110,21 @@ public class Controller {
         }
     }
 
-    private static void loadSteamIds() {
-        mMatchIdHash = new HashSet<Long>();
-        mUserIdHash = new HashSet<Long>();
-        try {
-            mSQLController.openConnection();
-            List<Long> matchIdList = MatchID.getAllMatchID(mSQLController);
-            List<Long> userIdList = User.getAllUserId(mSQLController);
-            mSQLController.close();
-
-            mMatchIdHash.addAll(matchIdList);
-            mUserIdHash.addAll(userIdList);
-
-            // mMatchIdHash.addAll(matchIdList);
-            // mUserIdHash.addAll(userIdList);
-
-            Logger.getLogger(TAG).log(Level.INFO, "Steam IDs and Match IDs were successfully loaded");
-        } catch (SQLException e) {
-            Logger.getLogger(TAG).log(Level.SEVERE, "Error loading steam or match ids from database", e);
-        } catch (NullPointerException e) {
-            Logger.getLogger(TAG).log(Level.SEVERE, "Either mMatchIdList or mUserIdList was null", e);
-        }
-    }
-
-    public boolean checkUserRegistration(long steamId) {
-        return mUserIdHash.contains(steamId);
-    }
-
     public boolean signUpNewUser(long steamId64) {
         if (steamId64 < STEAM_ID_64_DIFFERENCE) {
             steamId64 += STEAM_ID_64_DIFFERENCE;
         }
 
-        if (!checkUserRegistration(steamId64)) {
-            List<User> userList = mQueryExecutor.scheduleQueryUserSummaries(new long[]{steamId64});
-            saveUsersToDB(userList);
+        List<User> userList = mQueryExecutor.scheduleQueryUserSummaries(new long[]{steamId64});
+        saveUsersToDB(userList);
 
-            if (userList.size() == 0) {
-                return false;
-            }
-
-            long userId = userList.get(0).getSteamId32();
-            mUserIdHash.add(userId);
-
-            return true;
+        if (userList.size() == 0) {
+            return false;
         }
 
-        return false;
+        long userId = userList.get(0).getSteamId32();
+
+        return true;
     }
 
     public List<User> getAllUsers() {
@@ -193,10 +156,76 @@ public class Controller {
         return null;
     }
 
+    public List<Long> getUserMatches(long... steamId32) {
+        try {
+            mSQLController.openConnection();
+            List<Long> matchIDList = MatchID.getAllMatchIDsByUser(mSQLController, steamId32);
+            mSQLController.close();
+
+            return matchIDList;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
     public boolean saveMatchDetails(List<MatchDetails> matchDetails) {
         try {
             mSQLController.openConnection();
             for (MatchDetails m : matchDetails) {
+                m.saveToDB(mSQLController);
+                for (MatchDetailPlayer mp : m.getMatchDetailPlayerList()) {
+                    mp.saveToDB(mSQLController);
+                }
+            }
+            mSQLController.close();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public List<Long> checkDBMatches(long[] matchIdArray) {
+        try {
+            mSQLController.openConnection();
+            List<Long> matchIdList = MatchID.getMatchIDbyMatchID(mSQLController, matchIdArray);
+            mSQLController.close();
+            Set<Long> hs = new HashSet<>();
+            hs.addAll(matchIdList);
+            matchIdList.clear();
+            matchIdList.addAll(hs);
+            return matchIdList;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public List<MatchDetails> getMatchDetails(List<Long> matchIDList) {
+        try {
+            mSQLController.openConnection();
+            List<MatchDetails> matchDetailsList = MatchDetails.getMatchDetails(mSQLController, matchIDList);
+            mSQLController.close();
+            return matchDetailsList;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public String toGson(Object o) {
+        Gson gson = new Gson();
+        String output = gson.toJson(o);
+
+        return output;
+    }
+
+    public boolean saveMatchID(List<MatchID> matchIDList) {
+        try {
+            mSQLController.openConnection();
+            for (MatchID m : matchIDList) {
                 m.saveToDB(mSQLController);
             }
             mSQLController.close();
@@ -207,42 +236,64 @@ public class Controller {
         return false;
     }
 
-    public String toGson(Object o) {
-        Gson gson = new Gson();
-        String output = gson.toJson(o);
-
-        return output;
-    }
-
-    public List<MatchDetails> getLatestMatchesSingleUser(long steamId32) {
+    public List<MatchDetails> getLatestMatches(long steamId32) {
         if (steamId32 > STEAM_ID_64_DIFFERENCE) {
             steamId32 -= STEAM_ID_64_DIFFERENCE;
         }
 
-        List<MatchID> matchIDList = mQueryExecutor.scheduleQueryMatchTask(steamId32);
+        List<MatchID> matchIDList = mQueryExecutor.scheduleQueryMatchTask(steamId32); // Retrieve a list from Steam API of 25 latest matches
 
-        List<MatchID> matchesNotInHash = new ArrayList<>();
+        List<Long> matchIDListFiltered = new ArrayList<>();
 
         for (MatchID m : matchIDList) {
-            if (!mMatchIdHash.contains(m.getmMatchId())) {
-                matchesNotInHash.add(m);
+            matchIDListFiltered.add(m.getmMatchId());
+        }
+
+        Set<Long> hs = new HashSet<>();
+        hs.addAll(matchIDListFiltered);
+        matchIDListFiltered.clear();
+        matchIDListFiltered.addAll(hs);
+
+        long[] matchIDArray = new long[matchIDListFiltered.size()];
+
+        for (int i = 0; i < matchIDArray.length; i++) {
+            matchIDArray[i] = matchIDList.get(i).getmMatchId();
+        }
+
+        List<Long> retrievedMatches = checkDBMatches(matchIDArray); // Retrieve a list of all match ids that exist in database
+
+        saveMatchID(matchIDList);
+
+        if (retrievedMatches.size() == 0) { // If list from database is empty, query all 25 matches and return that list.
+            Logger.getLogger(TAG).log(Level.WARNING, "RetrievedMatches from database is 0!");
+            List<MatchDetails> matchDetailsList = mQueryExecutor.scheduleMatchDetailsList(matchIDArray);
+            saveMatchDetails(matchDetailsList);
+            return matchDetailsList;
+        }
+
+        List<MatchDetails> matchDetailsList = getMatchDetails(retrievedMatches); // Retrieve match details from the match ids earlier
+
+
+        if (retrievedMatches.size() < matchIDListFiltered.size()) { // If retrieved matches < list queried from server, remove all the matches that were already queried.
+            // TODO:
+            Logger.getLogger(TAG).log(Level.INFO, "retrievedMatches.size() == " + retrievedMatches.size() + "; matchIdList.size() == " + matchIDListFiltered.size());
+            List<Long> matchIDlongs = new ArrayList<>();
+
+            matchIDlongs.addAll(matchIDListFiltered);
+
+            matchIDlongs.removeAll(retrievedMatches);
+            // TODO:
+            for (long l : matchIDlongs) {
+                Logger.getLogger(TAG).log(Level.INFO, "matchIDLongs to be queried: " + String.valueOf(l));
             }
+
+            long[] array = matchIDlongs.stream().mapToLong(l -> l).toArray();
+
+            List<MatchDetails> partialList = mQueryExecutor.scheduleMatchDetailsList(array); // Query server with ids that weren't removed, save them to database, add them to the output list
+            saveMatchDetails(partialList);
+            matchDetailsList.addAll(partialList);
         }
-
-        if (matchesNotInHash.size() == 0) {
-            return null;
-        }
-
-        long[] matchID = new long[matchesNotInHash.size()];
-
-        for (int i = 0; i < matchID.length; i++) {
-            matchID[i] = matchesNotInHash.get(i).getmMatchId();
-        }
-
-        List<MatchDetails> matchDetailsList = mQueryExecutor.scheduleMatchDetailsList(matchID);
-        saveMatchDetails(matchDetailsList);
 
         return matchDetailsList;
     }
-
 }

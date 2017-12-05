@@ -1,5 +1,6 @@
 package edu.orangecoastcollege.cs273.api;
 
+import edu.orangecoastcollege.cs273.controller.SQLController;
 import edu.orangecoastcollege.cs273.model.*;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -11,6 +12,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -20,6 +22,7 @@ public class APIRequest {
     private static final String TAG = "APIRequest";
 
     private static final int REQUEST_TIMEOUT = 3000;
+    private static SQLController mSQLController = SQLController.getInstance();
 
     private static final String API_KEY = APIKey.getAPIKey();
     private static final String API_KEY_2 = APIKey.getAPIKey2();
@@ -356,7 +359,6 @@ public class APIRequest {
             playerList.add(player);
 
         }
-
         return playerList;
     }
 

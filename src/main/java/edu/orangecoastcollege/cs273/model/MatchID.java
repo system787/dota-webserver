@@ -45,12 +45,26 @@ public class MatchID {
 
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            Logger.getLogger(TAG).log(Level.SEVERE, "Error inserting into table \"match_id_table\" on match_id " + mMatchId + " on steam_id " + mPlayerId, e);
+            Logger.getLogger(TAG).log(Level.SEVERE, "Error inserting into table \"match_id_table\" on match_id " + mMatchId + " on steam_id " + mPlayerId);
         }
     }
 
     public static List<Long> getAllMatchID(SQLController dbc) {
         String selectStatement = "SELECT match_id FROM match_id_table";
+        return getMatches(dbc, selectStatement, true);
+    }
+
+    public static List<Long> getMatchIDbyMatchID(SQLController dbc, long[] matchId) {
+        StringBuilder sb = new StringBuilder("SELECT match_id FROM match_id_table WHERE match_id IN (");
+        for (int i = 0; i < matchId.length; i++) {
+            sb.append(String.valueOf(matchId[i]));
+            if (i < matchId.length - 1) {
+                sb.append(", ");
+            }
+        }
+        sb.append(")");
+        String selectStatement = sb.toString();
+
         return getMatches(dbc, selectStatement, true);
     }
 
@@ -62,6 +76,21 @@ public class MatchID {
 
     public static List<Long> getAllMatchIDsByUser(SQLController dbc, long steamId) {
         String selectStatement = "SELECT match_id FROM match_id_table WHERE (steam_id = " + String.valueOf(steamId) + ")";
+
+        return getMatches(dbc, selectStatement, true);
+    }
+
+    public static List<Long> getAllMatchIDsByUser(SQLController dbc, long[] steamId) {
+        StringBuilder sb = new StringBuilder("SELECT match_id FROM match_id_table WHERE steam_id IN (");
+        for (int i = 0; i < steamId.length; i++) {
+            sb.append(String.valueOf(steamId[i]));
+            if (i < steamId.length - 1) {
+                sb.append(", ");
+            }
+        }
+        sb.append(")");
+        String selectStatement = sb.toString();
+
 
         return getMatches(dbc, selectStatement, true);
     }
