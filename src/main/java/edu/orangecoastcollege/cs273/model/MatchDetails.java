@@ -134,6 +134,22 @@ public class MatchDetails {
         mGameMode = gameMode;
     }
 
+    @Override
+    public String toString() {
+        return "MatchDetails{" +
+                "mMatchID=" + mMatchID +
+                ", mMatchSeqNum=" + mMatchSeqNum +
+                ", mMatchDetailPlayerList=" + mMatchDetailPlayerList +
+                ", mRadiantWin=" + mRadiantWin +
+                ", mStartTime=" + mStartTime +
+                ", mDuration=" + mDuration +
+                ", mFirstBloodTime=" + mFirstBloodTime +
+                ", mLobbyType=" + mLobbyType +
+                ", mNumPlayers=" + mNumPlayers +
+                ", mGameMode=" + mGameMode +
+                '}';
+    }
+
     private static final String TAG = "MatchDetails";
 
     public void saveToDB(SQLController dbc) {

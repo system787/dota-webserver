@@ -4,6 +4,7 @@ import edu.orangecoastcollege.cs273.controller.SQLController;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -243,6 +244,32 @@ public class MatchDetailPlayer {
         mLevel = level;
     }
 
+    @Override
+    public String toString() {
+        return "MatchDetailPlayer{" +
+                "mMatchId=" + mMatchId +
+                ", mAccountId=" + mAccountId +
+                ", mPlayerSlot=" + mPlayerSlot +
+                ", mHeroId=" + mHeroId +
+                ", mItems=" + Arrays.toString(mItems) +
+                ", mKills=" + mKills +
+                ", mDeaths=" + mDeaths +
+                ", mAssists=" + mAssists +
+                ", mLeaverStatus=" + mLeaverStatus +
+                ", mGold=" + mGold +
+                ", mLastHits=" + mLastHits +
+                ", mDenies=" + mDenies +
+                ", mGPM=" + mGPM +
+                ", mXPM=" + mXPM +
+                ", mGoldSpent=" + mGoldSpent +
+                ", mHeroDamage=" + mHeroDamage +
+                ", mTowerDamage=" + mTowerDamage +
+                ", mHeroHealing=" + mHeroHealing +
+                ", mLevel=" + mLevel +
+                ", mMatchDetailPlayerUnit=" + mMatchDetailPlayerUnit +
+                '}';
+    }
+
     public MatchDetailPlayerUnit getMatchDetailPlayerUnit() {
         // if (mMatchDetailPlayerUnit == null) {
         //     Logger.getLogger(TAG).log(Level.SEVERE,"Player " + String.valueOf(mAccountId) + " does not have a unit");
@@ -293,7 +320,7 @@ public class MatchDetailPlayer {
 
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            Logger.getLogger(TAG).log(Level.SEVERE, "Error inserting into table \"match_detail_player\"");
+            Logger.getLogger(TAG).log(Level.SEVERE, "Error inserting into table \"match_detail_player\"", e);
         }
 
     }
@@ -340,7 +367,7 @@ public class MatchDetailPlayer {
             List<MatchDetailPlayer> playerDetailsList = new ArrayList<>();
 
             while (resultSet.next()) {
-                long steamId = resultSet.getLong("steam_id");
+                long steamId = resultSet.getLong("account_id");
                 MatchDetailPlayerUnit playerUnit = MatchDetailPlayerUnit.getPlayerUnit(dbc, matchId, steamId);
 
                 int[] itemArray = new int[6];
@@ -353,7 +380,7 @@ public class MatchDetailPlayer {
 
                 MatchDetailPlayer player = new MatchDetailPlayer(
                         resultSet.getLong("match_id"),
-                        resultSet.getLong("steam_id"),
+                        resultSet.getLong("account_id"),
                         resultSet.getInt("player_slot"),
                         resultSet.getInt("hero_id"),
                         itemArray,
@@ -377,7 +404,7 @@ public class MatchDetailPlayer {
 
             return playerDetailsList;
         } catch (SQLException e) {
-            Logger.getLogger(TAG).log(Level.SEVERE, "Error while retrieving player details list in match " + matchId);
+            Logger.getLogger(TAG).log(Level.SEVERE, "Error while retrieving player details list in match " + matchId, e);
         }
         return null;
     }

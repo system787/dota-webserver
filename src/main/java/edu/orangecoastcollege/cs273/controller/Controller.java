@@ -208,6 +208,13 @@ public class Controller {
             mSQLController.openConnection();
             List<MatchDetails> matchDetailsList = MatchDetails.getMatchDetails(mSQLController, matchIDList);
             mSQLController.close();
+
+            if (matchDetailsList.size() > 0) {
+                for (MatchDetails m : matchDetailsList) {
+                    Logger.getLogger(TAG).log(Level.INFO, m.toString());
+                }
+            }
+
             return matchDetailsList;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -254,11 +261,7 @@ public class Controller {
         matchIDListFiltered.clear();
         matchIDListFiltered.addAll(hs);
 
-        long[] matchIDArray = new long[matchIDListFiltered.size()];
-
-        for (int i = 0; i < matchIDArray.length; i++) {
-            matchIDArray[i] = matchIDList.get(i).getmMatchId();
-        }
+        long[] matchIDArray = matchIDListFiltered.stream().mapToLong(l -> l).toArray();
 
         List<Long> retrievedMatches = checkDBMatches(matchIDArray); // Retrieve a list of all match ids that exist in database
 
